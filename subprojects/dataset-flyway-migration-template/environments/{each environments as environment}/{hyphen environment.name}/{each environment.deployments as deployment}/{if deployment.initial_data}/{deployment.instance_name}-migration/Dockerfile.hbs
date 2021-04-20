@@ -1,0 +1,17 @@
+{{define 'multi_staged_build' false ~}}
+{{#if multi_staged_build ~}}
+FROM gradle:{{component.gradle_version}}-jdk{{component.jdk_base_version}} AS build
+COPY --chown=gradle:gradle . /home/gradle/
+WORKDIR /home/gradle
+RUN gradle build --no-daemon
+{{/if}}
+
+FROM {{deployment.flyway_container_base_image}}
+RUN mkdir /app
+{{#if multi_staged_build ~}}
+COPY --from=build /home/gradle/build/libs/db-migrate*.jar /app/db-migrate.jar
+{{else}}
+COPY ./build/libs/db-migrate*.jar /app/db-migrate.jar
+{{/if}}
+COPY ./entrypoint.sh /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]

@@ -1,0 +1,37 @@
+entities:
+- name: graphql_type_reference
+  namespace: laplacian.arch.backend.api.graphql
+  supertype_name: graphql_field
+  supertype_namespace: laplacian.arch.backend.api.graphql
+  subtype_key_value: graphql_type
+
+  properties:
+  - name: graphql_type_name
+    type: string
+
+  - name: graphql_type_group
+    type: string
+    optional: true
+    default_value: |
+      graphqlType.group
+
+  - name: record_type
+    type: string
+    snippet: |
+      referencingGraphqlType.name.upperCamelize()
+
+  - name: record_type_in_gql
+    type: string
+    snippet: |
+      referencingGraphqlType.graphqlTypeName
+
+  relationships:
+  - name: referencing_graphql_type
+    reference_entity_name: graphql_type
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '1'
+    mappings:
+    - from: graphql_type_name
+      to: name
+    - from: graphql_type_group
+      to: group

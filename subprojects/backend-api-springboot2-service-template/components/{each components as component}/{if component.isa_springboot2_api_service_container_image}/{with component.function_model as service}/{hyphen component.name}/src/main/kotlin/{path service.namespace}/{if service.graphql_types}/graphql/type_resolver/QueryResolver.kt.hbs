@@ -1,0 +1,41 @@
+{{define "package" (concat service.namespace '.graphql.type_resolver') ~}}
+package {{package}}
+import org.springframework.stereotype.Component
+import graphql.schema.idl.RuntimeWiring
+import graphql.schema.idl.TypeRuntimeWiring
+import graphql.schema.DataFetchingEnvironment
+import org.dataloader.DataLoaderRegistry
+
+{{#each service.graphql_type_groups as |graphql_type_group| ~}}
+import {{service.namespace}}.graphql.type_resolver.{{lower-snake graphql_type_group}}.*
+{{/each}}
+
+/**
+ * The resolver of the graphql root query type.
+ */
+@Component
+class QueryResolver(
+    {{#each service.graphql_type_groups as |graphql_type_group| ~}}
+    val {{lower-camel graphql_type_group}}QueryResolver: {{upper-camel graphql_type_group}}QueryResolver,
+    {{/each}}
+) {
+    /**
+     * Registers the field fetchers.
+     */
+    fun registerFetcher(wiring: RuntimeWiring.Builder): RuntimeWiring.Builder = wiring.type(
+        TypeRuntimeWiring.newTypeWiring("Query")
+        {{#each service.graphql_type_groups as |graphql_type_group| ~}}
+        .dataFetcher("{{lower-camel graphql_type_group}}") { _ -> emptyMap<String, String>()}
+        {{/each}}
+    ).also {
+        {{#each service.graphql_type_groups as |graphql_type_group| ~}}
+        {{lower-camel graphql_type_group}}QueryResolver.registerFetcher(it)
+        {{/each}}
+    }
+
+    fun registerLoader(registry: DataLoaderRegistry): DataLoaderRegistry = registry.also {
+        {{#each service.graphql_type_groups as |graphql_type_group| ~}}
+        {{lower-camel graphql_type_group}}QueryResolver.registerLoader(it)
+        {{/each}}
+    }
+}

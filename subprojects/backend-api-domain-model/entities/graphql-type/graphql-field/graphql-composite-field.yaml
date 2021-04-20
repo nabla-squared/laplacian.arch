@@ -1,0 +1,29 @@
+entities:
+- name: graphql_composite_field
+  namespace: laplacian.arch.backend.api.graphql
+  supertype_name: graphql_field
+  supertype_namespace: laplacian.arch.backend.api.graphql
+  subtype_key_value: composite
+
+  properties:
+  - name: data_model_name
+    type: string
+
+  - name: data_model_namespace
+    type: string
+
+  - name: record_type
+    type: string
+    snippet: |
+      dataModelName.upperCamelize()
+
+  relationships:
+  - name: data_model
+    reference_entity_name: entity
+    reference_entity_namespace: laplacian.metamodel
+    cardinality: '1'
+    mappings:
+    - from: data_model_name
+      to: name
+    - from: data_model_namespace
+      to: namespace

@@ -1,0 +1,103 @@
+{{define "class_base_name" (upper-camel graphql_type.name) ~}}
+{{define "instance_base_name" (lower-camel graphql_type.name) ~}}
+{{define 'index_default_sorts' search_index.default_sorts ~}}
+{{define 'index_fields' search_index.document_model.stored_properties ~}}
+package {{service.namespace}}.search.{{lower-snake graphql_type.name}}
+
+import org.springframework.stereotype.Component
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
+
+import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.search.sort.*
+import org.elasticsearch.search.aggregations.AggregationBuilders
+import org.elasticsearch.search.aggregations.Aggregations
+import org.elasticsearch.search.aggregations.bucket.terms.Terms
+import org.elasticsearch.search.aggregations.bucket.filter.*
+import org.elasticsearch.search.aggregations.metrics.*
+import org.elasticsearch.search.aggregations.bucket.range.ParsedDateRange
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram
+import org.elasticsearch.search.aggregations.PipelineAggregatorBuilders
+import org.elasticsearch.search.aggregations.pipeline.SimpleValue
+import org.elasticsearch.script.Script
+
+import com.fasterxml.jackson.module.kotlin.*
+import java.util.concurrent.CompletableFuture
+import java.time.*
+{{#each search_index.queries as |query| ~}}
+import {{service.namespace}}.search.{{lower-snake graphql_type.name}}.{{lower-snake query.name}}.*
+{{/each}}
+
+@Component
+class {{class_base_name}}SearcherImpl(
+    private val searcher: ReactiveElasticsearchOperations
+): {{class_base_name}}Searcher {
+
+    companion object {
+        const val INDEX_NAME = "{{search_index.name}}"
+    }
+
+    override fun {{lower-camel graphql_type.default_searcher_name}}(
+        input: {{class_base_name}}DocumentSearchInput
+    ): CompletableFuture<List<{{class_base_name}}Document>> {
+        val query = NativeSearchQueryBuilder()
+        {{#each index_fields as |property| ~}}
+        {{define 'prop_name' (lower-camel property.name) ~}}
+        {{#if (eq property.type 'string') ~}}
+        if (!input.{{prop_name}}.equalsTo.isEmpty()) {
+            query.withQuery(QueryBuilders.termsQuery("{{property.name}}", input.{{prop_name}}.equalsTo))
+        }
+        if (!input.{{prop_name}}.contains.isEmpty()) {
+            query.withQuery(QueryBuilders.matchQuery("{{property.name}}", input.{{prop_name}}.contains.joinToString(" ")))
+        }
+        {{/if}}
+        {{#if (eq property.type 'number') ~}}
+        if (!input.{{prop_name}}.equalsTo.isEmpty()) {
+            query.withQuery(QueryBuilders.termsQuery("{{property.name}}", input.{{prop_name}}.equalsTo))
+        }
+        if (input.{{prop_name}}.inRangeFrom != null) {
+            query.withQuery(QueryBuilders.rangeQuery("{{property.name}}").from(input.{{prop_name}}.inRangeFrom))
+        }
+        if (input.{{prop_name}}.inRangeTo != null) {
+            query.withQuery(QueryBuilders.rangeQuery("{{property.name}}").to(input.{{prop_name}}.inRangeTo))
+        }
+        {{/if}}
+        {{/each}}
+        return searcher.search(
+            query.build(),
+            {{class_base_name}}Document::class.java,
+            IndexCoordinates.of(INDEX_NAME),
+        )
+        .map{ it.content }
+        {{#if index_default_sorts ~}}
+        .sort(
+        {{~#each index_default_sorts as |sort| ~}}
+        {{define 'sort_field' (concat (lower-camel sort.field) (if sort.is_numeric '.toInt()' '')) ~}}
+        {{define 'sort_order' (if (eq sort.order 'desc') 'Descending' '') ~}}
+        {{~#if @first ~}}
+        compareBy{{sort_order}}<{{class_base_name}}Document> { it.{{sort_field}} }
+        {{~else~}}
+        .thenBy{{sort_order}} { it.{{sort_field}} }
+        {{~/if~}}
+        {{~/each~}}
+        )
+        {{~/if}}
+        .collectList()
+        .toFuture()
+    }
+    {{#each search_index.queries as |query| ~}}
+    {{define 'query_name' (lower-camel query.name) ~}}
+    {{define 'class_base_name' (upper-camel (concat search_index.name ' ' query_name)) ~}}
+    {{define 'response_data_class' (if query.aggregates
+      (concat (upper-camel (concat search_index.name ' ' query.name 'Data')))
+      (concat 'List<' (upper-camel search_index.name) 'Document>')
+    ) ~}}
+    override fun {{query_name}}(
+        input: {{class_base_name}}Input
+    ): CompletableFuture<{{response_data_class}}> {
+        return {{query_name}}Query(input, searcher)
+    }
+    {{/each}}
+}

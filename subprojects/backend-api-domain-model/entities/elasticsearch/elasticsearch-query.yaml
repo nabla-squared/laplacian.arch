@@ -1,0 +1,73 @@
+entities:
+- name: elasticsearch_query
+  namespace: laplacian.arch.backend.api.elasticsearch
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: index_name
+    type: string
+    primary_key: true
+
+  - name: description
+    type: string
+    optional: true
+    default_value: |
+      "${name}"
+
+  - name: page_size
+    description: |
+      The size of the page to be returned
+    type: string
+    optional: true
+    default_value: |
+      "200"
+    domain_type_name:
+      integer_or_placeholder
+
+  - name: variable_page_size
+    type: boolean
+    snippet: |
+      pageSize?.contains("\${") ?: false
+
+  - name: page_number
+    description: |
+      Zero-based page index.
+    type: string
+    optional: true
+    default_value: |
+      "0"
+    domain_type_name:
+      integer_or_placeholder
+
+  - name: variable_page_number
+    type: boolean
+    snippet: |
+      pageNumber?.contains("\${") ?: false
+
+  relationships:
+  - name: predicate
+    reference_entity_name: elasticsearch_query_predicate
+    reference_entity_namespace: laplacian.arch.backend.api.elasticsearch.query
+    cardinality: '0..1'
+    aggregate: true
+
+  - name: sort
+    reference_entity_name: elasticsearch_query_sort
+    reference_entity_namespace: laplacian.arch.backend.api.elasticsearch.query
+    cardinality: '*'
+    aggregate: true
+
+  - name: aggregates
+    reference_entity_name: elasticsearch_aggregate
+    reference_entity_namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+    cardinality: '*'
+    aggregate: true
+
+  - name: parameters
+    reference_entity_name: api_call_argument
+    reference_entity_namespace: laplacian.arch.backend.api
+    cardinality: '*'
+    aggregate: true

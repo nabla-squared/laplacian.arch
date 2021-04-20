@@ -1,0 +1,57 @@
+  {{define 'service' component.function_model ~}}
+  #
+  # {{component.name}}
+  #
+  {{deployment.instance_name}}:
+    build:
+      context: ../../components/{{hyphen component.name}}
+      dockerfile: Dockerfile.local-build
+    container_name: {{deployment.instance_name}}
+    ports:
+    - '{{printf '%1$s:%1$s' deployment.http_port}}'
+    {{#if deployment.enable_debug ~}}
+    - '{{printf '%1$s:%1$s' deployment.debug_port}}'
+    {{/if}}
+    {{#if deployment.enable_jmx ~}}
+    - '{{printf '%1$s:%1$s' deployment.jmx_port}}'
+    {{/if}}
+    expose:
+    - '{{deployment.http_port}}'
+    {{#if deployment.enable_debug ~}}
+    - '{{deployment.debug_port}}'
+    {{/if}}
+    {{#if deployment.enable_jmx ~}}
+    - '{{deployment.jmx_port}}'
+    {{/if}}
+    {{#if deployment.data_files ~}}
+    volumes:
+    {{#each deployment.data_files as |file| ~}}
+    -  './{{file.dir}}/{{file.filename}}:/app/{{file.dir}}/{{file.filename}}:ro'
+    {{/each}}
+    {{/if}}
+    environment:
+    - 'API_VERSION={{service.version}}'
+    {{#if deployment.enable_debug ~}}
+    - 'ENABLE_DEBUG=true'
+    - 'DEBUG_PORT={{deployment.debug_port}}'
+    {{/if}}
+    {{#if deployment.enable_jmx ~}}
+    - 'ENABLE_JMX=true'
+    - 'JMX_PORT={{deployment.jmx_port}}'
+    {{/if}}
+    {{#each deployment.datasources as |datasource| ~}}
+    {{define 'prefix' (concat 'datasource.' (hyphen datasource.name) '.') ~}}
+    {{printf "- '%s=%s'" (upper-snake (concat prefix 'username')) datasource.username}}
+    {{printf "- '%s=%s'" (upper-snake (concat prefix 'password')) datasource.password}}
+    {{printf "- '%s=%s'" (upper-snake (concat prefix 'jdbc-url')) datasource.jdbc_connection_string}}
+    {{/each}}
+    {{#if service.depends_on_redis_cache ~}}
+    {{define 'redis_server_deployment' (first (filter environment.deployments "(eq @it.component.type 'redis_server')")) ~}}
+    - 'REDIS_HOST={{redis_server_deployment.component.instance_name}}'
+    - 'REDIS_PORT={{redis_server_deployment.component.port}}'
+    {{~/if}}
+    {{#each service_configurations as |config| ~}}
+    - '{{config.environment_variable_name}}={{trim config.default_value}}'
+    {{/each}}
+    networks:
+    - backend

@@ -1,0 +1,40 @@
+"""
+{{graphql_type.description}}
+"""
+type {{upper-camel graphql_type.name}} {
+  """
+  Search the indexed documents
+  """
+  {{lower-camel graphql_type.default_searcher_name}}(
+    {{define 'entity' type.document_model ~}}
+    {{#each entity.stored_properties as |prop| ~}}
+    {{define 'param_type' (case
+      (or
+        (eq prop.type 'string')
+        (eq prop.type 'date')
+        (eq prop.type 'datetime')
+        (eq prop.type 'time')
+      ) 'StringSearchInput'
+      (eq prop.type 'number') 'IntSearchInput'
+      (eq prop.type 'boolean') 'BooleanSearchInput'
+      (upper-camel prop.type)
+    ) ~}}
+    {{lower-camel prop.name}}: {{param_type}}
+    {{/each}}
+  ): [{{upper-camel entity.name}}Document]!
+
+  {{#each search_index.queries as |query| ~}}
+  {{define 'response_data_class' (if query.aggregates
+    (concat (upper-camel (concat search_index.name ' ' query.name 'Data')))
+    (concat '[' (upper-camel search_index.name) 'Document!]')
+  ) ~}}
+  """
+  {{shift query.description width=2}}
+  """
+  {{lower-camel query.name}}(
+  {{#each query.parameters as |parameter| }}
+    {{lower-camel parameter.name}}: {{parameter.graphql_type}}{{if parameter.required '!'}}
+  {{/each}}
+  ): {{response_data_class}}!
+  {{/each}}
+}

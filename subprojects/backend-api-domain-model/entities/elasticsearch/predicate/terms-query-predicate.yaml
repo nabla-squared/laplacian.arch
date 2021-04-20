@@ -1,0 +1,15 @@
+entities:
+- name: terms_query_predicate
+  namespace: laplacian.arch.backend.api.elasticsearch.query
+  supertype_name: elasticsearch_query_predicate
+  subtype_key_value: terms
+
+  properties:
+  - name: field
+    type: string
+
+  - name: value
+    type: string
+
+  - name: boost
+    type: number

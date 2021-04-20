@@ -1,0 +1,105 @@
+{{define 'class_base_name' (upper-camel graphql_type.name) ~}}
+{{define 'resolver_class_name' (concat class_base_name 'Resolver') ~}}
+{{define 'query_fields_with_fetcher' (filter graphql_type.query_fields '@it.fetcher') ~}}
+{{define 'query_fields_with_batch_fetcher' (filter query_fields_with_fetcher '@it.fetcher.is_batch') ~}}
+{{define 'base_package' (concat service.namespace '.graphql.type_resolver') ~}}
+{{define 'package' (concat base_package '.' graphql_type.fqn) ~}}
+package {{package}}
+
+import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Qualifier
+import graphql.schema.idl.RuntimeWiring
+import graphql.schema.idl.TypeRuntimeWiring
+import graphql.schema.DataFetchingEnvironment
+import org.dataloader.DataLoader
+import org.dataloader.DataLoaderRegistry
+{{#if query_fields_with_batch_fetcher ~}}
+import org.dataloader.BatchLoader
+{{~/if}}
+import reactor.core.publisher.Mono
+import java.util.concurrent.CompletableFuture
+{{#each (unique (map query_fields_with_fetcher '@it.fetcher.java_interface_name')) as |fetcher_interface_name| ~}}
+import {{base_package}}.{{fetcher_interface_name}}
+{{/each}}
+{{#each query_fields_with_fetcher as |field| ~}}
+{{#if field.referencing_graphql_type ~}}
+{{define 'ref_type' field.referencing_graphql_type ~}}
+{{define 'graphql_type_package' (concat service.namespace '.graphql.type_resolver.' ref_type.fqn) ~}}
+import {{graphql_type_package}}.*
+{{/if}}
+{{/each}}
+
+/**
+ * The graphql type resolver for {{graphql_type.name}} type.
+ */
+@Component("{{graphql_type.fqn}}.resolver")
+class {{resolver_class_name}}(
+    {{#each query_fields_with_fetcher as |field| ~}}
+    @Qualifier("{{field.fqn}}.fetcher")
+    val {{lower-camel field.name}}FieldFetcher: {{field.fetcher.java_interface}},
+    {{/each}}
+) {
+    {{#each query_fields_with_fetcher as |field| ~}}
+    {{define 'method_name' (lower-camel field.name) ~}}
+    {{define 'input_class_name' (concat (upper-camel field.name) 'FieldArguments') ~}}
+    /**
+     * Fetches the value of {{field.name}}.
+     */
+    fun {{method_name}}(environment: DataFetchingEnvironment): CompletableFuture<{{field.return_type}}>
+        {{#if field.fetcher.is_batch ~}}
+        = environment
+            .getDataLoader<{{field.context_type}}, {{field.return_type}}>("{{field.fqn}}.loader")
+            .load(environment.getSource() as {{field.context_type}})
+        {{else}}
+        = {{lower-camel field.name}}FieldFetcher
+            .fetch(environment)
+            .toFuture()
+        {{/if}}
+    {{/each}}
+
+    /**
+     * Registers the field fetchers of the fields of {{graphql_type.name}} type.
+     */
+    fun registerFetcher(wiring: RuntimeWiring.Builder): RuntimeWiring.Builder = wiring.type(
+            TypeRuntimeWiring.newTypeWiring("{{upper-camel graphql_type.fqn}}")
+            {{define 'fields' (filter query_fields_with_fetcher
+              '(and (not @it.root_field) (not @it.context_data_model_name))'
+            ) ~}}
+            {{#each fields as |field| ~}}
+            {{define 'method_name' (lower-camel field.name) ~}}
+            .dataFetcher("{{method_name}}") { env -> {{method_name}}(env) }
+            {{/each}}
+        )
+        {{#each graphql_type.data_model.aggregated_entities as |aggregated_model| ~}}
+        {{define 'fields' (filter query_fields_with_fetcher
+          '(eq @it.context_data_model_name aggregated_model.name)'
+        ) ~}}
+        {{#if fields}}
+        .type (
+            TypeRuntimeWiring.newTypeWiring("{{upper-camel (concat graphql_type.group '_' aggregated_model.name)}}")
+            {{#each fields as |field| ~}}
+            {{define 'method_name' (lower-camel field.name) ~}}
+            .dataFetcher("{{method_name}}") { env -> {{method_name}}(env) }
+            {{/each}}
+        )
+        {{/if}}
+    {{/each}}
+
+    /**
+     * Register dataloader used in batch request.
+     */
+    fun registerLoader(registry: DataLoaderRegistry): DataLoaderRegistry {
+        {{#each query_fields_with_batch_fetcher as |field| ~}}
+        val {{lower-camel field.name}}Loader = BatchLoader<{{upper-camel field.context_type}}, {{upper-camel field.return_type}}> { keys ->
+            {{lower-camel field.name}}FieldFetcher.load(keys).toFuture()
+        }
+        {{/each}}
+        return registry
+        {{#each query_fields_with_batch_fetcher as |field| ~}}
+        .register(
+            "{{field.fqn}}.loader",
+            DataLoader.newDataLoader({{lower-camel field.name}}Loader)
+        )
+        {{/each}}
+    }
+}

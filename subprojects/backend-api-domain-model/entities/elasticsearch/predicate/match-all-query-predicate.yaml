@@ -1,0 +1,5 @@
+entities:
+- name: match_all_query_predicate
+  namespace: laplacian.arch.backend.api.elasticsearch.query
+  supertype_name: elasticsearch_query_predicate
+  subtype_key_value: match_all

@@ -1,0 +1,15 @@
+{{define 'class_base_name' (upper-camel graphql_type.name) ~}}
+{{define 'config_class_name' (concat class_base_name 'ResolverConfig') ~}}
+{{define 'package' (concat service.namespace '.graphql.type_resolver.' graphql_type.fqn) ~}}
+package {{package}}
+
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
+
+@Component("{{graphql_type.fqn}}.resolver.config")
+data class {{config_class_name}} (
+    {{#each graphql_type.configurations as |config| ~}}
+    @Value("{{concat '\${' config.definition.key '}'}}")
+    val {{lower-camel config.name}}: String,
+    {{/each}}
+)

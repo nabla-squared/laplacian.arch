@@ -1,0 +1,39 @@
+entities:
+- name: graphql_field_link
+  namespace: laplacian.arch.backend.api.graphql
+  supertype_name: graphql_field_fetcher
+  supertype_namespace: laplacian.arch.backend.api.graphql
+  subtype_key_value: graphql_field_link
+
+  properties:
+  - name: type_name
+    type: string
+    domain_type_name: identifier
+
+  - name: group
+    type: string
+    optional: true
+    default_value: |
+      graphqlType.group
+
+  - name: field_name
+    type: string
+    domain_type_name: identifier
+
+  relationships:
+  - name: linked_graphql_type
+    reference_entity_name: graphql_type
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '1'
+    mappings:
+    - from: type_name
+      to: name
+    - from: group
+      to: group
+
+  - name: linked_graphql_field
+    reference_entity_name: graphql_field
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '1'
+    snippet: |
+      linkedGraphqlType.fields.find{ it.name == fieldName }!!

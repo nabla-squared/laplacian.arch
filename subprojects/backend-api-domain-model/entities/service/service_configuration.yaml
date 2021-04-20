@@ -1,0 +1,75 @@
+entities:
+- name: service_configuration
+  namespace: laplacian.arch.backend.api
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+    domain_type_name: service_configuration_name
+
+  - name: category
+    type: string
+    primary_key: true
+    domain_type_name: service_configuration_category
+
+  - name: type
+    type: string
+    domain:
+      choices:
+      - value: string
+      - value: int
+      - value: float
+      - value: boolean
+
+  - name: key
+    type: string
+    snippet: |
+      "${category}.${name}"
+
+  - name: default_value
+    type: string
+    optional: true
+
+  - name: environment_variable_name
+    type: string
+    optional: true
+    default_value: |
+      "${key.upperUnderscorize()}"
+
+- name: configuration_binding
+  namespace: laplacian.arch.backend.api
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+    domain:
+      pattern: |
+        [a-z][-a-z0-9]*
+
+  - name: category
+    type: string
+    primary_key: true
+    domain:
+      pattern: |
+        [a-z][-a-z0-9]*(\.[a-z][-a-z0-9]*)*
+
+  - name: variable_name
+    type: string
+    optional: true
+    domain:
+      pattern: |
+        [a-z][a-zA-Z0-9]*
+    default_value: |
+      "${name.lowerCamelize()}"
+
+  relationships:
+  - name: definition
+    reference_entity_name: service_configuration
+    cardinality: '1'
+    mappings:
+    - from: name
+      to: name
+    - from: category
+      to: category

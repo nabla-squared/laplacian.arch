@@ -1,0 +1,27 @@
+entities:
+- name: graphql_type_entry
+  namespace: laplacian.arch.backend.api
+
+  properties:
+  - name: name
+    type: string
+
+  - name: group
+    type: string
+    optional: true
+
+  relationships:
+  - name: service
+    reference_entity_name: service
+    cardinality: '1'
+    reverse_of: graphql_type_entries
+
+  - name: graphql_type
+    reference_entity_name: graphql_type
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '1'
+    mappings:
+    - from: name
+      to: name
+    - from: group
+      to: group

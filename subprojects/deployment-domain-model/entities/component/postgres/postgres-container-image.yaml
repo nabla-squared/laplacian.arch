@@ -1,0 +1,12 @@
+entities:
+- name: postgres_container_image
+  namespace: laplacian.arch.deployment.component.postgres
+  supertype_name: container_image
+  supertype_namespace: laplacian.arch.deployment.component.container
+
+  properties:
+  - name: base_name
+    type: string
+    optional: true
+    default_value: |
+      "postgres"

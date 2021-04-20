@@ -1,0 +1,37 @@
+entities:
+- name: cache_policy
+  namespace: laplacian.arch.backend.api.cache
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: store_type
+    type: string
+    subtype_key: true
+
+  - name: ignore_error
+    type: boolean
+    optional: true
+    default_value: |
+      true
+
+  - name: key
+    type: string
+    snippet: |
+      "${storeType.lowerUnderscorize()}:${name.lowerUnderscorize()}"
+
+  relationships:
+  - name: expiration_time
+    reference_entity_name: duration
+    reference_entity_namespace: laplacian.arch.backend.api
+    cardinality: '0..1'
+    aggregate: true
+
+  - name: configurations
+    reference_entity_name: configuration_binding
+    reference_entity_namespace: laplacian.arch.backend.api
+    cardinality: '*'
+    aggregate: true
+

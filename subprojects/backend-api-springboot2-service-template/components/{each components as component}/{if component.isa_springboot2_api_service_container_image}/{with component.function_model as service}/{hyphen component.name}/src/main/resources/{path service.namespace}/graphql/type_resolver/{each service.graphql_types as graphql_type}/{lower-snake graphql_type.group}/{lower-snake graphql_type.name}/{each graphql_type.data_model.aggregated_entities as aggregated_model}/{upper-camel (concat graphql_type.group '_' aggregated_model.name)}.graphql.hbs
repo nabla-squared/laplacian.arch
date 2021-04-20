@@ -1,0 +1,30 @@
+{{define 'type_name' (upper-camel (concat graphql_type.group '_' aggregated_model.name)) ~}}
+{{define 'query_fields_with_fetcher' (filter graphql_type.query_fields '(and (not @it.root_field) @it.fetcher)') ~}}
+"""
+A graphql type representing an item of {{graphql_type.name}}.
+"""
+type {{type_name}} {
+    {{#each aggregated_model.stored_properties as |property| ~}}
+    """
+    {{trim property.description}}
+    """
+    {{lower-camel property.name}}: {{property.class_name}}{{if (not property.nullable) '!'}},
+    {{/each}}
+    {{#each aggregated_model.aggregates as |aggregate| ~}}
+    {{define 'type_name' (printf
+      (if aggregate.multiple '[%s!]' '%s')
+      (upper-camel (concat graphql_type.group '_' aggregate.reference_entity.name))
+    ) ~}}
+    """
+    {{trim aggregate.description}}
+    """
+    {{lower-camel aggregate.name}}: {{type_name}}{{if (not aggregate.nullable) '!'}},
+    {{/each}}
+    {{define 'fields' (filter query_fields_with_fetcher '(eq @it.context_data_model_name aggregated_model.name)') ~}}
+    {{#each fields as |field| ~}}
+    """
+    {{trim field.description}}
+    """
+    {{lower-camel field.name}}: {{field.return_type_in_gql}}{{if (not field.optional) '!'}},
+    {{/each}}
+}

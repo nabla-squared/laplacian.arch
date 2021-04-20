@@ -1,0 +1,58 @@
+entities:
+- name: terms_aggregate
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  description: |
+    A multi-bucket value source based aggregation where buckets are dynamically built
+    - one per unique value.
+  supertype_name: elasticsearch_aggregate
+  subtype_key_value: terms
+
+  properties:
+  - name: max_buckets
+    description: |
+      The number of term buckets should be returned (default: 10)
+    type: string
+    optional: true
+    domain_type_name: integer_or_placeholder
+
+  - name: variable_max_buckets
+    type: boolean
+    snippet: |
+      maxBuckets?.contains("\${") ?: false
+
+  - name: sort_by_count
+    description: |
+      The sort order ('asc' or 'desc') in which the buckets will be returned
+    type: string
+    optional: true
+    domain_type_name: sort_order_or_placeholder
+
+  - name: variable_order
+    type: boolean
+    snippet: |
+      sortByCount?.contains("\${") ?: false
+
+  - name: shard_size
+    description: |
+      The number of term buckets each shard will return to the coordinating node
+      (the node that coordinates the search execution)
+    type: string
+    optional: true
+    domain_type_name: integer_or_placeholder
+
+  - name: variable_shard_size
+    type: boolean
+    snippet: |
+      shardSize?.contains("\${") ?: false
+
+  - name: min_doc_count
+    description: |
+      the minimum document count required per term
+    type: string
+    optional: true
+    domain_type_name: integer_or_placeholder
+
+  - name: variable_min_doc_count
+    type: boolean
+    snippet: |
+      minDocCount?.contains("\${") ?: false

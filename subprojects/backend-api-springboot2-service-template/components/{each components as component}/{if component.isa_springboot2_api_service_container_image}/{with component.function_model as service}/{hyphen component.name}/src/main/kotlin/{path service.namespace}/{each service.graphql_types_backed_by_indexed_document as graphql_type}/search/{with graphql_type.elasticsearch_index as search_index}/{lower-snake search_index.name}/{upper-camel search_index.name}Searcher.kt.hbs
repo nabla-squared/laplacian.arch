@@ -1,0 +1,37 @@
+{{define "class_base_name" (upper-camel graphql_type.name) ~}}
+package {{service.namespace}}.search.{{lower-snake graphql_type.name}}
+
+import org.springframework.stereotype.Component
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
+
+import java.util.concurrent.CompletableFuture
+
+{{#each search_index.queries as |query| ~}}
+import {{service.namespace}}.search.{{lower-snake search_index.name}}.{{lower-snake query.name}}.*
+{{/each}}
+
+/**
+ * A search interface against {{graphql_type.name}} index on the search engine.
+ */
+interface {{class_base_name}}Searcher {
+    /**
+     * Finds {{plural class_base_name}} which matches the given conditions.
+     */
+    fun {{lower-camel graphql_type.default_searcher_name}}(
+        input: {{class_base_name}}DocumentSearchInput = {{class_base_name}}DocumentSearchInput()
+    ): CompletableFuture<List<{{class_base_name}}Document>>
+    {{#each search_index.queries as |query| ~}}
+    {{define 'query_name' (lower-camel query.name) ~}}
+    {{define 'class_base_name' (upper-camel (concat search_index.name ' ' query_name)) ~}}
+    {{define 'response_data_class' (if query.aggregates
+      (concat (upper-camel (concat search_index.name ' ' query.name 'Data')))
+      (concat 'List<' (upper-camel search_index.name) 'Document>')
+    ) ~}}
+    /**
+     * {{trim query.description}}
+     */
+    fun {{lower-camel query_name}}(
+        input: {{class_base_name}}Input = {{class_base_name}}Input()
+    ): CompletableFuture<{{response_data_class}}>
+    {{/each}}
+}

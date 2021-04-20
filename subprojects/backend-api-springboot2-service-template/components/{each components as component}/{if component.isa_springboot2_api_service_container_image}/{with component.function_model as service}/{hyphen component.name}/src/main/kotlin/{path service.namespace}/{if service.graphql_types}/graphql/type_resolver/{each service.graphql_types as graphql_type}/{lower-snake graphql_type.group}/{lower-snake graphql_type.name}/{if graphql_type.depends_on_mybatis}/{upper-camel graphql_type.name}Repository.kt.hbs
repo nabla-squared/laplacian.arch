@@ -1,0 +1,54 @@
+{{define 'class_base_name' (upper-camel graphql_type.name) ~}}
+{{define 'repository_class_name' (concat class_base_name 'Repository') ~}}
+{{define 'record_class_name' class_base_name ~}}
+{{define 'fields_fetched_with_mybatis' (filter graphql_type.query_fields '(eq @it.fetcher.type "mybatis")') ~}}
+{{define 'datasources' (unique (map fields_fetched_with_mybatis '@it.fetcher.datasource')) ~}}
+{{define 'base_package' (concat service.namespace '.graphql.type_resolver.') ~}}
+{{define 'package' (concat base_package graphql_type.fqn) ~}}
+package {{package}}
+import org.apache.ibatis.session.SqlSession
+import org.springframework.stereotype.Component
+{{#each fields_fetched_with_mybatis as |field| ~}}
+{{define 'ref_type' field.referencing_graphql_type ~}}
+import {{package}}.{{lower-snake field.name}}.*
+{{#if (not (eq ref_type graphql_type)) ~}}
+import {{concat base_package ref_type.fqn}}.*
+{{/if}}
+{{/each}}
+/**
+ * Datasource repository for the {{graphql_type.name}} type resolver.
+ */
+@Component("{{graphql_type.fqn}}.repository")
+class {{repository_class_name}} (
+    {{#each datasources as |datasource| ~}}
+    val {{lower-camel datasource.name}}SqlSession: SqlSession,
+    {{/each}}
+) {
+    {{#each fields_fetched_with_mybatis as |field| ~}}
+    {{define 'arguments_class_name' (concat (upper-camel field.name) 'FieldArguments') ~}}
+    {{define 'result_type' (printf
+      (if field.multiple 'List<%s>' (if field.optional '%s?' '%s'))
+      'Map<String, Any?>'
+    ) ~}}
+    {{define 'in_batch' field.fetcher.is_batch ~}}
+    {{define 'selector_method' (if (or in_batch field.multiple) 'selectList' 'selectOne') ~}}
+    /**
+     * Fetches {{field.name}} value from the datasource.
+     */
+    {{define 'context_param' (case
+      in_batch (printf 'keys: List<%s>, ' field.context_type)
+      field.context_type (printf 'self: %s, ' field.context_type)
+      ''
+    ) ~}}
+    {{define 'arguments' (if field.arguments (printf 'arguments: %s' arguments_class_name)) ~}}
+    fun {{lower-camel field.name}}({{context_param}}{{arguments}}): {{printf (if in_batch 'List<%s>' '%s') result_type}} =
+        {{lower-camel field.fetcher.datasource.name}}SqlSession.{{selector_method}}("{{graphql_type.fqn}}.{{lower-camel field.name}}", mapOf(
+            {{#if context_param ~}}
+            {{if in_batch '"keys" to keys,' '"self" to self,'}}
+            {{~/if}}
+            {{#if arguments ~}}
+            "args" to arguments,
+            {{~/if}}
+        ))
+    {{/each}}
+}

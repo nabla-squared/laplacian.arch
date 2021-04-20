@@ -1,0 +1,6 @@
+value_domain_types:
+- name: file_path
+  namespace: laplacian.arch.backend.api
+  type: string
+  domain:
+    pattern: ^(.+)\/([^\/]+)$

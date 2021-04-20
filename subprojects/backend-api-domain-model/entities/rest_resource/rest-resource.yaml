@@ -1,0 +1,39 @@
+entities:
+- name: rest_resource
+  namespace: laplacian.arch.backend.api.rest
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: description
+    type: string
+    optional: true
+    default_value: |
+      "${name}"
+
+  - name: resource_model_name
+    type: string
+    optional: true
+
+  - name: base_url
+    type: string
+
+  - name: enable_automatic_cookie_handling
+    type: boolean
+    optional: true
+    default_value: |
+      false
+
+  relationships:
+  - name: operations
+    reference_entity_name: rest_operation
+    cardinality: '1..*'
+    aggregate: true
+
+  - name: configurations
+    reference_entity_name: configuration_binding
+    reference_entity_namespace: laplacian.arch.backend.api
+    cardinality: '*'
+    aggregate: true

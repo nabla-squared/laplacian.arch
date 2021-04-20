@@ -1,0 +1,17 @@
+entities:
+- name: duration
+  namespace: laplacian.arch.backend.api
+
+  properties:
+  - name: amount
+    type: string
+    domain_type_name: integer_or_placeholder
+
+  - name: unit
+    type: string
+    domain:
+      choices:
+      - value: day
+      - value: hour
+      - value: second
+      - value: millisecond

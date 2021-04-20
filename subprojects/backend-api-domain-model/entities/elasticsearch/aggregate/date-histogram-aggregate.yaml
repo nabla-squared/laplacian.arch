@@ -1,0 +1,104 @@
+entities:
+- name: date_histogram_aggregate
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  supertype_name: elasticsearch_aggregate
+  supertype_namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  subtype_key_value: date_histogram
+
+  properties:
+  - name: format
+    type: string
+    optional: true
+
+  - name: timezone
+    type: string
+    optional: true
+
+  - name: min_doc_count
+    description: |
+      the minimum document count required per bucket
+    type: string
+    optional: true
+    domain_type_name: integer_or_placeholder
+
+  - name: variable_min_doc_count
+    type: boolean
+    snippet: |
+      minDocCount?.contains("\${") ?: false
+
+  relationships:
+  - name: interval
+    reference_entity_name: date_histogram_interval
+    cardinality: '1'
+    aggregate: true
+
+  - name: extended_bounds
+    reference_entity_name: date_histogram_extended_bounds
+    cardinality: '0..1'
+    aggregate: true
+
+- name: date_histogram_extended_bounds
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  properties:
+  - name: min
+    type: string
+    optional: true
+
+  - name: max
+    type: string
+    optional: true
+
+- name: date_histogram_interval
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  properties:
+  - name: type
+    type: string
+    subtype_key: true
+
+  - name: unit
+    type: string
+
+  - name: value
+    type: string
+
+  - name: variable_unit
+    type: boolean
+    snippet: |
+      unit.contains("\${")
+
+  - name: variable_value
+    type: boolean
+    snippet: |
+      value.contains("\${")
+
+- name: date_histogram_calendar_interval
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  supertype_name: date_histogram_interval
+  supertype_namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  subtype_key_value: calendar
+
+  properties:
+  - name: unit
+    type: string
+    domain:
+      pattern: |
+        \$\{[^}]*\}|minute|hour|day|week|month|quarter|year
+
+- name: date_histogram_fixed_interval
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  supertype_name: date_histogram_interval
+  supertype_namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  subtype_key_value: fixed
+
+  properties:
+  - name: unit
+    type: string
+    domain:
+      pattern: |
+        \$\{[^}]*\}|millisecond|second|minute|hour|day
+
+  - name: value
+    type: string
+    domain:
+      pattern: |
+        \$\{[^}]*\}|[0-9]*

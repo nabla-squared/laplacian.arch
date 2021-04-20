@@ -1,0 +1,70 @@
+{{define "class_base_name" (upper-camel graphql_type_group) ~}}
+{{define "resolver_class_name" (concat class_base_name 'QueryResolver') ~}}
+{{define "graphql_types_in_group" (filter service.graphql_types '(eq @it.group graphql_type_group)') ~}}
+{{define "graphql_types_with_root_query" (filter graphql_types_in_group '@it.root_query_fields') ~}}
+{{define "base_package" (concat service.namespace '.graphql.type_resolver.') ~}}
+{{define "package" (concat base_package (lower-snake graphql_type_group)) ~}}
+package {{package}}
+import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Qualifier
+import graphql.schema.idl.RuntimeWiring
+import graphql.schema.idl.TypeRuntimeWiring
+import graphql.schema.DataFetchingEnvironment
+import org.dataloader.DataLoader
+import org.dataloader.DataLoaderRegistry
+import reactor.core.publisher.Mono
+import java.util.concurrent.CompletableFuture
+
+{{#each graphql_types_with_root_query as |graphql_type| ~}}
+{{#each graphql_type.root_query_fields as |field| ~}}
+{{define 'ref_type' field.referencing_graphql_type ~}}
+{{#if ref_type ~}}
+import {{base_package}}{{ref_type.fqn}}.*
+{{/if}}
+{{/each}}
+{{/each}}
+/**
+ * The root query resolver for the {{graphql_type_group}} type group.
+ */
+@Component
+class {{resolver_class_name}}(
+    {{#each graphql_types_in_group as |graphql_type| ~}}
+    {{define 'resolver_class_name' (concat (upper-camel graphql_type.name) 'Resolver') ~}}
+    @Qualifier("{{graphql_type.fqn}}.resolver")
+    val {{lower-camel resolver_class_name}}: {{upper-camel resolver_class_name}},
+    {{/each}}
+) {
+    {{#each graphql_types_with_root_query as |graphql_type| ~}}
+    {{#each graphql_type.root_query_fields as |field| ~}}
+    {{define 'resolver_class_name' (concat (upper-camel graphql_type.name) 'Resolver') ~}}
+    {{define 'method_name' (lower-camel field.name) ~}}
+    /**
+     * {{trim field.description}}
+     */
+    fun {{method_name}}(context: DataFetchingEnvironment): CompletableFuture<{{field.return_type}}>
+        = {{lower-camel resolver_class_name}}.{{method_name}}(context)
+    {{/each}}
+    {{/each}}
+
+    /**
+     * Registers all the field fetchers of graphql types which belong to this group.
+     */
+    fun registerFetcher(wiring: RuntimeWiring.Builder): RuntimeWiring.Builder = wiring.type(
+        TypeRuntimeWiring.newTypeWiring("{{class_base_name}}")
+        {{#each graphql_types_in_group as |graphql_type| ~}}
+        {{#each graphql_type.root_query_fields as |field| ~}}
+        {{define 'method_name' (lower-camel field.name) ~}}
+        .dataFetcher("{{method_name}}") { env -> {{method_name}}(env) }
+        {{/each}}
+        {{/each}}
+    ).also {
+        {{#each graphql_types_in_group as |graphql_type| ~}}
+        {{lower-camel graphql_type.name}}Resolver.registerFetcher(it)
+        {{/each}}
+    }
+    fun registerLoader(registry: DataLoaderRegistry): DataLoaderRegistry = registry.also {
+        {{#each graphql_types_in_group as |graphql_type| ~}}
+        {{lower-camel graphql_type.name}}Resolver.registerLoader(it)
+        {{/each}}
+    }
+}

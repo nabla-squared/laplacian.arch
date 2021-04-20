@@ -1,0 +1,10 @@
+entities:
+- name: avg_bucket_aggregate
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  supertype_name: elasticsearch_aggregate
+  supertype_namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  subtype_key_value: avg_bucket
+
+  properties:
+  - name: buckets_path
+    type: string

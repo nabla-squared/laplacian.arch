@@ -1,0 +1,7 @@
+value_domain_types:
+- name: integer_or_placeholder
+  namespace: laplacian.arch.backend.api
+  type: string
+  domain:
+    pattern: |
+      \$\{[^}]*\}|[1-9][0-9]*|0

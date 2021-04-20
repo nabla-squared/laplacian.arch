@@ -1,0 +1,28 @@
+{{define "class_base_name" (upper-camel graphql_field.name) ~}}
+{{define "arguments_class_name" (concat class_base_name 'FieldArguments') ~}}
+{{define 'graphql_type_package' (concat service.namespace '.graphql.type_resolver.' (lower-snake graphql_type.group) '.' (lower-snake graphql_type.name)) ~}}
+{{define 'package'  (concat graphql_type_package '.' (lower-snake graphql_field.name)) ~}}
+package {{package}}
+
+import {{graphql_type_package}}.*
+
+/**
+ * A data class for input arguments of {{graphql_field.name}} field.
+ */
+data class {{arguments_class_name}} (
+    {{#each graphql_field.arguments as |argument| ~}}
+    val {{lower-camel argument.name}}: {{argument.class_name}}{{if argument.nullable "?" }} = {{trim argument.default_value}},
+    {{/each}}
+) {
+    companion object {
+        @JvmStatic
+        fun from(args: Map<String, Any?>): {{arguments_class_name}} {
+            return {{arguments_class_name}}(
+                {{#each graphql_field.arguments as |argument| ~}}
+                {{define "name" (lower-camel argument.name) ~}}
+                {{name}} = args["{{name}}"] as? {{argument.class_name}}{{#if (not argument.nullable)}} ?: {{trim argument.default_value}}{{/if}},
+                {{/each}}
+            )
+        }
+    }
+}

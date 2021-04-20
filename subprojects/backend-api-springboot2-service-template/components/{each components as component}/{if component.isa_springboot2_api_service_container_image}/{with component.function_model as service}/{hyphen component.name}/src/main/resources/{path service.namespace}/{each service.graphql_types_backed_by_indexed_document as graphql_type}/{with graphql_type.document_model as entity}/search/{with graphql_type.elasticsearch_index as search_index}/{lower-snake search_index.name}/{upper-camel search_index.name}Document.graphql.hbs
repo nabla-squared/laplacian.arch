@@ -1,0 +1,26 @@
+"""
+The index data structure of the {{graphql_type.name}}
+"""
+type {{upper-camel graphql_type.name}}Document {
+  {{#each entity.stored_properties as |p| ~}}
+  {{define 'prop_type' (case
+    (eq p.type "number") 'Int'
+    (eq p.type "datetime") 'DateTime'
+    (upper-camel p.type)
+  ) ~}}
+  """
+  {{shift p.description width=2}}
+  """
+  {{lower-camel p.identifier}}: {{prop_type}}{{if (not p.nullable) '!'}}
+  {{/each}}
+
+  {{#each graphql_type.relationships as |relationship| ~}}
+  """
+  {{shift relationship.description width=2}}
+  """
+  {{define 'return_type' (printf
+    (if relationship.multiple '[%s!]' '%s') relationship.field_type_name
+  ) ~}}
+  {{lower-camel relationship.name}}: {{return_type}}{{if (not relationship.nullable) '!'}}
+  {{/each}}
+}

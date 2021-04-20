@@ -1,0 +1,14 @@
+value_domain_types:
+- name: service_configuration_name
+  namespace: laplacian.arch.backend.api
+  type: string
+  domain:
+    pattern: |
+      [a-z]+(-[0-9a-z]+)*
+
+- name: service_configuration_category
+  namespace: laplacian.arch.backend.api
+  type: string
+  domain:
+    pattern: |
+      [a-z][-a-z0-9]*(\.[a-z][-a-z0-9]*)*

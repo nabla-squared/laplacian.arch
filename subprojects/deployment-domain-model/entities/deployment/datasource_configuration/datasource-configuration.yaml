@@ -1,0 +1,23 @@
+entities:
+- name: datasource_configuration
+  namespace: laplacian.arch.deployment.datasource
+  subtype_key_value: oracle_jdbc
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: type
+    type: string
+    subtype_key: true
+
+  relationships:
+  - name: datasource
+    reference_entity_name: datasource
+    reference_entity_namespace: laplacian.arch.backend.api.datasource
+    cardinality: '1'
+    mappings:
+    - from: name
+      to: name
+

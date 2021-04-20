@@ -1,0 +1,12 @@
+entities:
+- name: redis_container_image
+  namespace: laplacian.arch.deployment.component.redis
+  supertype_name: container_image
+  supertype_namespace: laplacian.arch.deployment.component
+
+  properties:
+  - name: base_name
+    type: string
+    optional: true
+    default_value: |
+      "redis"

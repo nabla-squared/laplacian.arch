@@ -1,0 +1,104 @@
+entities:
+- name: query_string_predicate
+  namespace: laplacian.arch.backend.api.elasticsearch.query
+  supertype_name: elasticsearch_query_predicate
+  subtype_key_value: query_string
+
+  properties:
+  - name: query
+    type: string
+
+  - name: default_field
+    type: string
+    optional: true
+
+  - name: allow_leading_wildcard
+    type: boolean
+    optional: true
+
+  - name: analyze_wildcard
+    type: boolean
+    optional: true
+
+  - name: analyzer
+    type: string
+    optional: true
+
+  - name: auto_generate_synonyms_phrase_query
+    type: boolean
+    optional: true
+
+  - name: boost
+    type: float
+    optional: true
+
+  - name: default_operator
+    type: string
+    optional: true
+    domain:
+      choices:
+      - value: OR
+      - value: AND
+
+  - name: enable_position_increments
+    type: boolean
+    optional: true
+
+  - name: fields
+    type: string
+    multiple: true
+    optional: true
+
+  - name: fuzziness
+    type: string
+    optional: true
+    domain:
+      choices:
+      - value: AUTO
+      - value: ONE
+      - value: TWO
+      - value: ZERO
+
+  - name: fuzzy_max_expansion
+    type: int
+    optional: true
+
+  - name: fuzzy_prefix_length
+    type: int
+    optional: true
+
+  - name: fuzzy_transpositions
+    type: boolean
+    optional: true
+
+  - name: lenient
+    type: boolean
+    optional: true
+
+  - name: max_determinized_states
+    type: int
+    optional: true
+
+  - name: minimum_should_match
+    type: string
+    optional: true
+
+  - name: quote_analyzer
+    type: string
+    optional: true
+
+  - name: phrase_slop
+    type: int
+    optional: true
+
+  - name: quote_field_suffix
+    type: string
+    optional: true
+
+  - name: rewrite
+    type: string
+    optional: true
+
+  - name: time_zone
+    type: string
+    optional: true

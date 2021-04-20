@@ -1,0 +1,107 @@
+entities:
+- name: graphql_field
+  namespace: laplacian.arch.backend.api.graphql
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: description
+    type: string
+    optional: true
+    default_value: |
+      "The ${name} field."
+
+  - name: field_type
+    type: string
+    subtype_key: true
+
+  - name: multiple
+    type: boolean
+    optional: true
+    default_value: |
+      false
+
+  - name: optional
+    type: boolean
+    optional: true
+    default_value: |
+      false
+
+  - name: operation_type
+    type: string
+    optional: true
+    default_value: |
+      "query"
+    domain:
+      choices:
+      - value: query
+      - value: mutation
+      - value: subscription
+
+  - name: context_data_model_name
+    type: string
+    optional: true
+
+  - name: context_type
+    type: string
+    optional: true
+    snippet: |
+      when {
+          rootField -> null
+          (contextDataModelName == null) -> graphqlType.name
+          else -> contextDataModelName
+      }?.upperCamelize()
+
+  - name: record_type
+    type: string
+    snippet: |
+      "Any"
+
+  - name: record_type_in_gql
+    type: string
+    snippet: |
+      recordType
+
+  - name: return_type
+    type: string
+    snippet: |
+      if (multiple) "List<${recordType}>" else recordType
+
+  - name: return_type_in_gql
+    type: string
+    snippet: |
+      if (multiple) "[${recordTypeInGql}]" else recordTypeInGql
+
+  - name: root_field
+    description: |
+      Specifies whether this field is shown in the root query object.
+    type: boolean
+    optional: true
+    default_value: |
+      false
+
+  - name: fqn
+    type: string
+    snippet: |
+      "${graphqlType.fqn}.${name.lowerUnderscorize()}"
+
+  relationships:
+  - name: graphql_type
+    reference_entity_name: graphql_type
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '1'
+    reverse_of: fields
+
+  - name: fetcher
+    reference_entity_name: graphql_field_fetcher
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '0..1'
+    aggregate: true
+
+  - name: arguments
+    reference_entity_name: api_call_argument
+    reference_entity_namespace: laplacian.arch.backend.api
+    cardinality: '*'
+    aggregate: true

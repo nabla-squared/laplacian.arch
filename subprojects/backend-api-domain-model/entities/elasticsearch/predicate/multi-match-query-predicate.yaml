@@ -1,0 +1,13 @@
+entities:
+- name: multi_match_query_predicate
+  namespace: laplacian.arch.backend.api.elasticsearch.query
+  supertype_name: elasticsearch_query_predicate
+  subtype_key_value: multi_match
+
+  properties:
+  - name: value
+    type: string
+
+  - name: fields
+    type: string
+    multiple: true

@@ -1,0 +1,9 @@
+entities:
+- name: exists_query_predicate
+  namespace: laplacian.arch.backend.api.elasticsearch.query
+  supertype_name: elasticsearch_query_predicate
+  subtype_key_value: exists
+
+  properties:
+  - name: field
+    type: string

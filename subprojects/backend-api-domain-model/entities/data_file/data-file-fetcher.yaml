@@ -1,0 +1,15 @@
+entities:
+- name: data_file_fetcher
+  namespace: laplacian.arch.backend.api.data_file
+  supertype_name: graphql_field_fetcher
+  supertype_namespace: laplacian.arch.backend.api.graphql
+  subtype_key_value: data_file
+  description: |
+    A graphql field fetcher retrieving the value from a file located in the container.
+
+  relationships:
+  - name: data_file
+    reference_entity_name: data_file
+    reference_entity_namespace: laplacian.arch.backend.api.data_file
+    cardinality: '1'
+    aggregate: true

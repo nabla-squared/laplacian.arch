@@ -1,0 +1,20 @@
+{{define 'service_name' (hyphen service.name) ~}}
+{{define 'multi_staged_build'  (eq mode 'multi-staged') ~}}
+{{define 'application_base_dir' '/app' ~}}
+{{#if multi_staged_build ~}}
+FROM gradle:{{component.gradle_version}}-jdk{{component.jdk_base_version}} AS build
+COPY --chown=gradle:gradle . /home/gradle/
+WORKDIR /home/gradle
+RUN gradle build --no-daemon
+{{/if}}
+
+FROM {{component.container_base_image}}
+RUN mkdir {{application_base_dir}}
+WORKDIR {{application_base_dir}}
+COPY ./entrypoint.sh entrypoint.sh
+{{#if multi_staged_build ~}}
+COPY --from=build /home/gradle/build/libs/{{service_name}}*.jar api.jar
+{{else}}
+COPY ./build/libs/{{service_name}}*.jar api.jar
+{{/if}}
+ENTRYPOINT ["{{application_base_dir}}/entrypoint.sh"]

@@ -1,0 +1,28 @@
+plugins {
+    id 'maven-publish'
+    id 'java'
+}
+
+group = "{{project.name}}"
+version = "{{project.version}}"
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile '{{deployment.jdbc_driver_jar}}'
+    compile 'org.flywaydb:flyway-core:{{deployment.flyway_version}}'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'db.migration.JdbcMigration'
+    }
+    baseName = "db-migrate"
+    from {
+        configurations.compile.collect {
+            it.directory ? it : zipTree(it)
+        }
+    }
+}

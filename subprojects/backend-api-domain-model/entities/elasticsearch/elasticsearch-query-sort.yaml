@@ -1,0 +1,37 @@
+entities:
+- name: elasticsearch_query_sort
+  namespace: laplacian.arch.backend.api.elasticsearch.query
+
+  properties:
+  - name: type
+    type: string
+    primary_key: true
+    subtype_key: true
+
+  - name: order
+    type: string
+    domain_type_name: sort_order_or_placeholder
+    optional: true
+    default_value: |
+      "desc"
+
+  - name: variable_order
+    type: boolean
+    snippet: |
+      order?.contains("\${") ?: false
+
+- name: elasticsearch_query_score_sort
+  namespace: laplacian.arch.backend.api.elasticsearch.query
+  supertype_name: elasticsearch_query_sort
+  supertype_namespace: laplacian.arch.backend.api.elasticsearch.query
+  subtype_key_value: score
+
+- name: elasticsearch_query_field_sort
+  namespace: laplacian.arch.backend.api.elasticsearch.query
+  supertype_name: elasticsearch_query_sort
+  supertype_namespace: laplacian.arch.backend.api.elasticsearch.query
+  subtype_key_value: field
+
+  properties:
+  - name: name
+    type: string

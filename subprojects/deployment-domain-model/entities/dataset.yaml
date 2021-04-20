@@ -1,0 +1,17 @@
+entities:
+- name: dataset
+  namespace: laplacian.arch.deployment
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: tags
+    type: string
+    optional: true
+    multiple: true
+
+  - name: content
+    type: any_entity
+    multiple: true

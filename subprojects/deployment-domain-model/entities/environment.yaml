@@ -1,0 +1,61 @@
+entities:
+- name: environment
+  namespace: laplacian.arch.deployment
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: tier
+    type: string
+    domain:
+      choices:
+      - value: local
+      - value: development
+      - value: staging
+      - value: production
+
+  - name: uses_locally_built_container_images
+    type: boolean
+    optional: true
+    default_value: |
+      listOf("development", "local").contains(tier)
+
+  - name: uses_gcp
+    type: boolean
+    optional: true
+    default_value: |
+      deployments.any{ deployment ->
+          listOf("gcp", "gce").any {
+            deployment.type.contains("_${it}_")
+          }
+      }
+
+  relationships:
+  - name: deployments
+    cardinality: "*"
+    reference_entity_name: deployment
+    reference_entity_namespace: laplacian.arch.deployment
+    aggregate: true
+
+  - name: components
+    cardinality: "*"
+    reference_entity_name: component
+    reference_entity_namespace: laplacian.arch.deployment.component
+    snippet: |
+      deployments.map{ it.component }.distinct()
+
+  - name: container_deployments
+    cardinality: "*"
+    reference_entity_name: container_deployment
+    reference_entity_namespace: laplacian.arch.deployment.container
+    snippet: |
+      deployments.filterIsInstance<ContainerDeployment>()
+
+  - name: container_images
+    cardinality: "*"
+    reference_entity_name: container_image
+    reference_entity_namespace: laplacian.arch.deployment.component.container
+    snippet: |
+      components.filterIsInstance<ContainerImage>()

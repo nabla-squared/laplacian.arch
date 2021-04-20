@@ -1,0 +1,35 @@
+package {{service.namespace}}.configuration
+
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.jdbc.DataSourceBuilder
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder
+import java.util.concurrent.TimeUnit
+import javax.sql.DataSource
+
+/**
+ * Datasource configurations.
+ */
+@Configuration
+class JdbcDatasourceConfig {
+    {{#each service.blocking_datasources as |datasource| ~}}
+    @Bean
+    @ConfigurationProperties(prefix="datasource.{{hyphen datasource.name}}")
+    fun {{lower-camel datasource.name}}NativeDatasource(): DataSource = DataSourceBuilder.create().build()
+
+    @Bean
+    fun {{lower-camel datasource.name}}Datasource(
+        @Qualifier("{{lower-camel datasource.name}}NativeDatasource") datasource: DataSource,
+        @Value("\${datasource.{{hyphen datasource.name}}.logging.slow-query-threshold-mills:5000}") slowQueryThresholdMills: Long,
+    ): DataSource = ProxyDataSourceBuilder
+        .create(datasource)
+        .logQueryBySlf4j(SLF4JLogLevel.INFO)
+        .countQuery()
+        .logSlowQueryBySlf4j(slowQueryThresholdMills, TimeUnit.MILLISECONDS, SLF4JLogLevel.WARN)
+        .build()
+    {{/each}}
+}

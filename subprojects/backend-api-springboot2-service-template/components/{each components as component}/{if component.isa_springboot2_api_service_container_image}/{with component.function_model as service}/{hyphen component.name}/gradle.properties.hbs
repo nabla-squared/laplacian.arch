@@ -1,0 +1,24 @@
+springBootVersion={{component.springboot_version}}
+springDependencyVersion={{component.spring_dependency_manager_version}}
+kotlinJvmTarget={{component.jdk_major_version}}
+kotlinVersion={{component.kotlin_version}}
+kotlinxCoroutineVersion={{component.kotlin_coroutine_version}}
+reactorKotlinExtensionVersion={{component.reactor_kotlin_extension_version}}
+r2dbcPostgresVersion={{component.r2dbc_postgres_driver_version}}
+graphqlJavaWebfluxVersion={{component.springboot_graphql_webflux_version}}
+graphqlExtendedScalarVersion={{trim component.graphql_extended_scalar_version}}
+{{#if service.depends_on_mybatis ~}}
+springbootMybatisVersion={{trim component.springboot_mybatis_version}}
+{{~/if}}
+{{#if service.blocking_datasources ~}}
+datasourceProxyVersion={{trim component.datasource_proxy_version}}
+{{/if}}
+{{#if service.depends_on_blocking_oracle_datasource ~}}
+oracleJdbcDriverVersion={{trim component.oracle_jdbc_driver_version}}
+{{~/if}}
+{{#if service.depends_on_blocking_postgres_datasource ~}}
+postgresJdbcDriverVersion={{trim component.postgres_jdbc_driver_version}}
+{{~/if}}
+{{#if service.depends_on_blocking_mysql_datasource ~}}
+mysqlJdbcDriverVersion={{trim component.mysql_jdbc_driver_version}}
+{{~/if}}

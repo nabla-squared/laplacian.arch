@@ -1,0 +1,26 @@
+entities:
+- name: bool_query_predicate
+  namespace: laplacian.arch.backend.api.elasticsearch.query
+  supertype_name: elasticsearch_query_predicate
+  subtype_key_value: bool
+
+  relationships:
+  - name: must
+    reference_entity_name: elasticsearch_query_predicate
+    cardinality: '*'
+    aggregate: true
+
+  - name: must_not
+    reference_entity_name: elasticsearch_query_predicate
+    cardinality: '*'
+    aggregate: true
+
+  - name: should
+    reference_entity_name: elasticsearch_query_predicate
+    cardinality: '*'
+    aggregate: true
+
+  - name: filter
+    reference_entity_name: elasticsearch_query_predicate
+    cardinality: '*'
+    aggregate: true

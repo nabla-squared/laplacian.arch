@@ -1,0 +1,5 @@
+{{define 'rest_resource' fetcher.rest_resource ~}}
+{{define 'rest_operation' fetcher.rest_operation ~}}
+{{define 'rest_client_name' (concat (upper-camel rest_resource.name) 'RestResource') ~}}
+import {{service.namespace}}.rpc.rest.{{lower-snake rest_resource.name}}.{{upper-camel rest_client_name}}
+import {{service.namespace}}.rpc.rest.{{lower-snake rest_resource.name}}.{{lower-snake rest_operation.name}}.*

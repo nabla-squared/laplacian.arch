@@ -1,0 +1,12 @@
+entities:
+- name: elasticsearch_container_deployment
+  namespace: laplacian.arch.deployment.component.elasticsearch
+  supertype_name: container_deployment
+  supertype_namespace: laplacian.arch.deployment.container
+
+  properties:
+  - name: port
+    type: number
+    optional: true
+    default_value: |
+      9200

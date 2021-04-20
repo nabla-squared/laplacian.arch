@@ -1,0 +1,46 @@
+plugins {
+  id 'java'
+  id 'maven-publish'
+}
+
+group = "{{project.namespace}}"
+version = "{{service.version}}"
+
+defaultTasks 'build'
+
+repositories {
+  maven { url '../../mvn-repo' }
+  {{#if component.repositories ~}}
+  {{#each component.repositories as |repository| ~}}
+  {{repository}}
+  {{/each}}
+  {{else ~}}
+  mavenCentral()
+  {{/if}}
+}
+
+dependencies {
+  implementation "org.springframework:spring-context:$springVersion"
+  implementation "io.projectreactor:reactor-core:$reactorVersion"
+  implementation "{{project.namespace}}:{{hyphen component.name}}-lib:{{service.version}}"
+  implementation "com.graphql-java:graphql-java:$graphqlJavaVersion"
+}
+
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of("$jvmTarget")
+  }
+}
+
+publishing {
+  repositories {
+     maven {
+       url '../../mvn-repo'
+     }
+  }
+  publications {
+    maven(MavenPublication) {
+      from components.java
+    }
+  }
+}

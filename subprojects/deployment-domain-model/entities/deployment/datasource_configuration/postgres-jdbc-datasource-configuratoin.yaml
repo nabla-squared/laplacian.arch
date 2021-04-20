@@ -1,0 +1,18 @@
+entities:
+- name: postgres_jdbc_datasource_configuration
+  namespace: laplacian.arch.deployment.datasource
+  supertype_name: jdbc_datasource_configuration
+  supertype_namespace: laplacian.arch.deployment.datasource
+  subtype_key_value: postgres_jdbc
+
+  properties:
+  - name: jdbc_connection_string
+    type: string
+    snippet: |
+      "jdbc:postgresql://${url}/${databaseName}"
+
+  - name: driver_class_name
+    type: string
+    optional: true
+    default_value: |
+      "org.postgresql.Driver"

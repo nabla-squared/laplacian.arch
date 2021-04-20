@@ -1,0 +1,29 @@
+entities:
+- name: elasticsearch_aggregate
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: description
+    type: string
+    optional: true
+    default_value: |
+      "${name} ${aggregationType} aggregation"
+
+  - name: aggregation_type
+    type: string
+    subtype_key: true
+
+  - name: field
+    type: string
+    optional: true
+
+  relationships:
+  - name: sub_aggregates
+    reference_entity_name: elasticsearch_aggregate
+    cardinality: '*'
+    aggregate: true
+

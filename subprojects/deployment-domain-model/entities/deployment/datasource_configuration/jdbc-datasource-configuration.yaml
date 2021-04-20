@@ -1,0 +1,57 @@
+entities:
+- name: jdbc_datasource_configuration
+  namespace: laplacian.arch.deployment.datasource
+  supertype_name: datasource_configuration
+  supertype_namespace: laplacian.arch.deployment.datasource
+
+  description: |
+    jdbc datasource setting with Hikari connection pool.
+
+  properties:
+  - name: jdbc_connection_string
+    type: string
+
+  - name: url
+    type: string
+    optional: true
+    default_value: |
+      name.lowerHyphenize()
+
+  - name: username
+    type: string
+
+  - name: password
+    type: string
+
+  - name: database_name
+    type: string
+    optional: true
+    default_value: |
+      name.lowerHyphenize()
+
+  - name: driver_class_name
+    type: string
+
+  - name: slow_query_threshold_mills
+    type: number
+    optional: true
+
+  - name: minimum_idle
+    type: number
+    optional: true
+
+  - name: maximum_pool_size
+    type: number
+    optional: true
+
+  - name: idle_timeout
+    type: number
+    optional: true
+
+  - name: max-lifetime
+    type: number
+    optional: true
+
+  - name: connection_timeout
+    type: number
+    optional: true

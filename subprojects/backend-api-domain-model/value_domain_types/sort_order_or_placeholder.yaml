@@ -1,0 +1,7 @@
+value_domain_types:
+- name: sort_order_or_placeholder
+  namespace: laplacian.arch.backend.api
+  type: string
+  domain:
+    pattern: |
+      \$\{[^}]*\}|asc|desc

@@ -1,0 +1,23 @@
+{{define "package" (concat service.namespace '.rpc.rest.' (lower-snake rest_resource.name) '.' (lower-snake operation.name)) ~}}
+package {{package}}
+
+import {{service.namespace}}.util.*
+import java.time.*
+
+{{define 'class_base_name' (upper-camel operation.name) ~}}
+data class {{class_base_name}}Input (
+    {{#each operation.arguments as |argument| ~}}
+    val {{lower-camel argument.name}}: {{argument.class_name}}{{if argument.nullable "?" }} = {{trim argument.default_value}},
+    {{/each}}
+) {
+    companion object {
+        fun from(args: Map<String, Any?>): {{class_base_name}}Input {
+            return {{class_base_name}}Input(
+                {{#each operation.arguments as |argument| ~}}
+                {{define "name" (lower-camel argument.name) ~}}
+                {{name}} = args["{{name}}"] as? {{argument.class_name}}{{#if (not argument.nullable)}} ?: {{trim argument.default_value}}{{/if}},
+                {{/each}}
+            )
+        }
+    }
+}

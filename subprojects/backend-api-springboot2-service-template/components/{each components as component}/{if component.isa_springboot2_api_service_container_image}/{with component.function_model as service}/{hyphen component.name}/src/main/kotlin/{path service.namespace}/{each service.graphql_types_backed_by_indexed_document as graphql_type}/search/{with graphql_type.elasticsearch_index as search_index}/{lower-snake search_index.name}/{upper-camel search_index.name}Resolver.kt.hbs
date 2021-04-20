@@ -1,0 +1,52 @@
+{{define "class_base_name" (upper-camel graphql_type.name) ~}}
+package {{service.namespace}}.search.{{lower-snake graphql_type.name}}
+
+import org.dataloader.DataLoader
+import org.dataloader.DataLoaderRegistry
+import org.springframework.stereotype.Component
+import graphql.schema.idl.RuntimeWiring
+import graphql.schema.idl.TypeRuntimeWiring
+import graphql.schema.DataFetchingEnvironment
+import java.util.concurrent.CompletableFuture
+
+{{#each search_index.queries as |query| ~}}
+import {{service.namespace}}.search.{{lower-snake search_index.name}}.{{lower-snake query.name}}.*
+{{/each}}
+
+/**
+ * A reactive implementation of the {{graphql_type.name}} graphql type resolver.
+ */
+@Component
+class {{class_base_name}}Resolver(
+    {{define 'searcher_name' (concat class_base_name 'Searcher') ~}}
+    val {{lower-camel searcher_name}}: {{upper-camel searcher_name}},
+) {
+    {{define 'search_index_method_name' (lower-camel graphql_type.default_searcher_name) ~}}
+    fun {{search_index_method_name}}(context: DataFetchingEnvironment): CompletableFuture<List<{{upper-camel graphql_type.name}}Document>> =
+        {{lower-camel graphql_type.name}}Searcher
+        .{{search_index_method_name}}({{upper-camel graphql_type.name}}DocumentSearchInput.from(context.arguments))
+        .thenApply{ it.toList() }
+    {{#each search_index.queries as |query| ~}}
+    {{define 'query_name' (lower-camel query.name) ~}}
+    {{define 'class_base_name' (upper-camel (concat search_index.name ' ' query_name)) ~}}
+    {{define 'response_data_class' (if query.aggregates
+      (concat (upper-camel (concat graphql_type.name ' ' query.name 'Data')))
+      (concat 'List<' (upper-camel graphql_type.name) 'Document>')
+    ) ~}}
+    fun {{lower-camel query_name}}(context: DataFetchingEnvironment): CompletableFuture<{{response_data_class}}> =
+        {{lower-camel graphql_type.name}}Searcher
+        .{{lower-camel query.name}}({{upper-camel graphql_type.name}}{{upper-camel query.name}}Input.from(context.arguments))
+    {{/each}}
+
+    fun registerFetcher(wiring: RuntimeWiring.Builder) = wiring.type(
+        TypeRuntimeWiring.newTypeWiring("{{class_base_name}}")
+        .dataFetcher("{{search_index_method_name}}") { env -> {{search_index_method_name}}(env)}
+        {{#each search_index.queries as |query| ~}}
+        .dataFetcher("{{lower-camel query.name}}") { env -> {{lower-camel query.name}}(env)}
+        {{/each}}
+    )
+
+    companion object {
+        const val BY_PK = "comment_byPK"
+    }
+}

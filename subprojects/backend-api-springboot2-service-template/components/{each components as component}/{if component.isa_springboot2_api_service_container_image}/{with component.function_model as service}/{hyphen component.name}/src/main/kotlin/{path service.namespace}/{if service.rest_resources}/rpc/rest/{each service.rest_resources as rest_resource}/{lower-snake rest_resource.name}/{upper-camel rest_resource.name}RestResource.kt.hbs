@@ -1,0 +1,17 @@
+{{define "package" (concat service.namespace '.rpc.rest.' (lower-snake rest_resource.name)) ~}}
+package {{package}}
+
+import graphql.GraphQLContext
+import reactor.core.publisher.Mono
+{{#each rest_resource.operations as |operation| ~}}
+import {{package}}.{{lower-snake operation.name}}.*
+{{/each}}
+
+/**
+ * The REST interface of the {{rest_resource.name}} resource.
+ */
+interface {{upper-camel rest_resource.name}}RestResource {
+    {{#each rest_resource.operations as |operation| ~}}
+    fun {{lower-camel operation.name}}({{#if operation.arguments}}args: {{upper-camel operation.name}}Input{{/if}}): Mono<{{operation.response.type_in_java}}>
+    {{/each}}
+}

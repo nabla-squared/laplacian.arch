@@ -1,0 +1,48 @@
+entities:
+- name: elasticsearch_container_image
+  namespace: laplacian.arch.deployment.component.elasticsearch
+  supertype_name: container_image
+  supertype_namespace: laplacian.arch.deployment.component.container
+
+  properties:
+  - name: container_image
+    type: string
+    optional: true
+    default_value: |
+      "elasticsearch"
+
+  - name: plugins
+    type: string
+    multiple: true
+    optional: true
+
+  - name: configuration_file_dir_path
+    type: string
+    optional: true
+    default_value: |
+      "/usr/share/elasticsearch/config"
+
+  - name: uses_custom_image
+    type: boolean
+    snippet: |
+      plugins.isNotEmpty() || configurationFiles.isNotEmpty()
+
+  relationships:
+  - name: configuration_files
+    reference_entity_name: configuration_file
+    reference_entity_namespace: laplacian.arch.deployment.component.elasticsearch
+    cardinality: '*'
+    aggregate: true
+
+- name: configuration_file
+  namespace: laplacian.arch.deployment.component.elasticsearch
+  properties:
+  - name: path
+    type: string
+    primary_key: true
+
+  - name: content
+    type: string
+    optional: true
+    default_value: |
+      ""

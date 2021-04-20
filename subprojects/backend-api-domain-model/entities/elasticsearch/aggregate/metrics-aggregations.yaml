@@ -1,0 +1,26 @@
+entities:
+- name: sum_aggregate
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  supertype_name: elasticsearch_aggregate
+  subtype_key_value: sum
+
+- name: avg_aggregate
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  supertype_name: elasticsearch_aggregate
+  subtype_key_value: avg
+
+- name: min_aggregate
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  supertype_name: elasticsearch_aggregate
+  subtype_key_value: min
+
+- name: max_aggregate
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  supertype_name: elasticsearch_aggregate
+  subtype_key_value: max
+
+- name: value_count_aggregate
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  supertype_name: elasticsearch_aggregate
+  subtype_key_value: count
+

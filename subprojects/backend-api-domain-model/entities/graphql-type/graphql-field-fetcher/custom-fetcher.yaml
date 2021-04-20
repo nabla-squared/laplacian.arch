@@ -1,0 +1,13 @@
+entities:
+- name: custom_fetcher
+  namespace: laplacian.arch.backend.api.graphql
+  supertype_name: graphql_field_fetcher
+  supertype_namespace: laplacian.arch.backend.api.graphql
+  subtype_key_value: custom
+
+  properties:
+  - name: async
+    type: boolean
+    optional: true
+    default_value: |
+      true

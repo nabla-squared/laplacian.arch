@@ -1,0 +1,102 @@
+{{define "class_base_name" (upper-camel graphql_type.name) ~}}
+package {{service.namespace}}.search.{{lower-snake graphql_type.name}}
+
+import org.dataloader.DataLoader
+import org.dataloader.DataLoaderRegistry
+import org.springframework.stereotype.Component
+import graphql.schema.idl.RuntimeWiring
+import graphql.schema.idl.TypeRuntimeWiring
+import graphql.schema.DataFetchingEnvironment
+import java.util.concurrent.CompletableFuture
+
+import {{service.namespace}}.query.*
+{{#each graphql_type.relationships as |relationship| ~}}
+{{#if (eq relationship.type 'indexed_document') ~}}
+import {{service.namespace}}.search.{{lower-snake relationship.referencing_graphql_type.name}}.*
+{{/if}}
+{{/each}}
+
+/**
+ * A reactive implementation of the {{graphql_type.name}} graphql type resolver.
+ */
+@Component
+class {{class_base_name}}DocumentResolver(
+    {{#each graphql_type.relationships as |relationship| ~}}
+    {{#if (eq relationship.type 'indexed_document') ~}}
+    {{define 'searcher_name' (concat (lower-camel relationship.referencing_graphql_type.name) 'Searcher') ~}}
+    val {{searcher_name}}: {{upper-camel searcher_name}},
+    {{/if}}
+    {{/each}}
+) {
+    {{#each graphql_type.relationships as |relationship| ~}}
+    {{#if (eq relationship.type 'indexed_document') ~}}
+    {{define 'from_type' (concat (upper-camel relationship.referenced_graphql_type.name) 'Document') ~}}
+    {{define 'to_type' (printf
+        (if relationship.multiple 'List<%sDocument>' '%sDocument')
+        (upper-camel relationship.referencing_graphql_type.name)
+    ) ~}}
+    fun {{lower-camel relationship.name}}(self: {{from_type}}, context: DataFetchingEnvironment): CompletableFuture<{{to_type}}> =
+        context
+        .getDataLoader<{{from_type}}, {{to_type}}>("{{upper-snake relationship.name}}")
+        .load(self)
+        .thenApply<{{to_type}}>{ it ?: emptyList() }
+    {{/if}}
+    {{/each}}
+
+    fun registerLoader(registry: DataLoaderRegistry) {
+        {{#each graphql_type.relationships as |relationship| ~}}
+        {{#if (eq relationship.type 'indexed_document') ~}}
+        {{define 'from_type' (concat (upper-camel relationship.referenced_graphql_type.name) 'Document') ~}}
+        {{define 'to_type' (printf
+            (if relationship.multiple 'List<%sDocument>' '%sDocument')
+            (upper-camel relationship.referencing_graphql_type.name)
+        ) ~}}
+        registry.register(
+            "{{upper-snake relationship.name}}", DataLoader.newMappedDataLoader<{{from_type}}, {{to_type}}> { keys ->
+            {{lower-camel relationship.referencing_graphql_type_name}}Searcher.{{relationship.referencing_graphql_type.default_searcher_name}}(
+                {{upper-camel relationship.referencing_graphql_type.name}}DocumentSearchInput(
+                    {{#each relationship.field_mappings as |mapping| ~}}
+                    {{lower-camel mapping.to}} = StringSearchInput(
+                        equalsTo = keys.map{ it.{{lower-camel mapping.from}} }
+                    ),
+                    {{/each}}
+                )
+            )
+            .thenApply { {{lower-camel relationship.name}} ->
+                {{#if relationship.multiple ~}}
+                val result = keys.fold(mutableMapOf<{{from_type}}, Mutable{{to_type}}>()) { acc, key ->
+                    acc[key] = mutableListOf()
+                    acc
+                }
+                {{else ~}}
+                val result = mutableMapOf<{{from_type}}, {{to_type}}>()
+                {{/if}}
+                {{lower-camel relationship.name}}.forEach { each ->
+                    val key = {{from_type}}().apply {
+                        {{#each relationship.field_mappings as |mapping| ~}}
+                        this.{{lower-camel mapping.from}} = each.{{lower-camel mapping.to}}
+                        {{/each}}
+                    }
+                    {{#if relationship.multiple ~}}
+                    result[key]?.add(each)
+                    {{else ~}}
+                    result[key] = each
+                    {{/if}}
+
+                }
+                result as Map<{{from_type}}, {{to_type}}>
+            }
+        })
+        {{/if}}
+        {{/each}}
+    }
+
+    fun registerFetcher(wiring: RuntimeWiring.Builder) = wiring.type(
+        TypeRuntimeWiring.newTypeWiring("{{class_base_name}}Document")
+        {{#each graphql_type.relationships as |relationship| ~}}
+        {{#if (eq relationship.type 'indexed_document') ~}}
+        .dataFetcher("{{lower-camel relationship.name}}") { env -> {{lower-camel relationship.name}}(env.getSource(), env) }
+        {{/if}}
+        {{/each}}
+    )
+}

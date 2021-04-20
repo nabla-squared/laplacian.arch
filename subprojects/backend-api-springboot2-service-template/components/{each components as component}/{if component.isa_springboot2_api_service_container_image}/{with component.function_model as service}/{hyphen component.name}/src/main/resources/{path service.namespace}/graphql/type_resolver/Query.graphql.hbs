@@ -1,0 +1,15 @@
+scalar Date
+scalar Time
+scalar DateTime
+
+"""
+The root query schema definition of {{service.name}}.
+"""
+type Query {
+  {{#each service.graphql_type_groups as |graphql_type_group| ~}}
+  """
+  {{trim graphql_type_group}}
+  """
+  {{lower-camel graphql_type_group}}: {{upper-camel graphql_type_group}}
+  {{/each}}
+}

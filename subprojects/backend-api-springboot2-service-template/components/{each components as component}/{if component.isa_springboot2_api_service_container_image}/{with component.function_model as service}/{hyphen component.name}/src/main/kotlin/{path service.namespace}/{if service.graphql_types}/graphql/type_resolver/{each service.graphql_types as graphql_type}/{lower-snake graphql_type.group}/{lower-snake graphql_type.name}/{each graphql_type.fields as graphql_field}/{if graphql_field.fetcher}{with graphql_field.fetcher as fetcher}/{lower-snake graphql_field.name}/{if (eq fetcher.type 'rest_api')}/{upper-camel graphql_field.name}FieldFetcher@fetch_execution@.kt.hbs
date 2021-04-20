@@ -1,0 +1,20 @@
+{{define 'rest_resource' fetcher.rest_resource ~}}
+{{define 'rest_operation' fetcher.rest_operation ~}}
+{{define 'rest_client_name' (concat (upper-camel rest_resource.name) 'RestResource')}}
+        return {{lower-camel rest_client_name}}
+        {{#if (not fetcher.argument_assignments) ~}}
+        .{{lower-camel rest_operation.name}}(environment.getContext())
+        {{else~}}
+        .{{lower-camel rest_operation.name}}({{upper-camel rest_operation.name}}Input(
+            {{#each fetcher.argument_assignments as |assignment| ~}}
+            {{define 'value' assignment.value ~}}
+            {{define 'value_expression' (case
+              (eq value.from 'fetcher_argument') (concat 'args.' (lower-camel value.name))
+              (eq value.from 'expression') (trim value.expression)
+              (eq value.from 'graphql_type_config') (concat 'conf.' (lower-camel value.name))
+              '""'
+            ) ~}}
+            {{lower-camel assignment.key}} = {{value_expression}},
+            {{/each}}
+        ))
+        {{/if}}

@@ -1,0 +1,60 @@
+entities:
+- name: elasticsearch_index
+  namespace: laplacian.arch.backend.api.elasticsearch
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: description
+    type: string
+    optional: true
+    default_value: |
+      "elasticsearch index schema of ${name}"
+
+  - name: document_model_name
+    type: string
+
+  relationships:
+  - name: document_model
+    reference_entity_name: entity
+    reference_entity_namespace: laplacian.metamodel
+    cardinality: '1'
+    mappings:
+    - from: document_model_name
+      to: name
+
+  - name: queries
+    reference_entity_name: elasticsearch_query
+    cardinality: '*'
+    mappings:
+    - from: name
+      to: index_name
+
+  - name: default_sorts
+    reference_entity_name: elasticsearch_index_sort
+    cardinality: '*'
+    aggregate: true
+
+- name: elasticsearch_index_sort
+  namespace: laplacian.arch.backend.api.elasticsearch
+
+  properties:
+  - name: field
+    type: string
+    primary_key: true
+
+  - name: order
+    type: string
+    optional: true
+    domain:
+      choices:
+      - value: asc
+      - value: desc
+    default_value: |
+      "asc"
+
+  - name: is_numeric
+    type: boolean
+    optional: true

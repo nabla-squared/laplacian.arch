@@ -1,0 +1,57 @@
+entities:
+- name: bucket_sort_aggregate
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  supertype_name: elasticsearch_aggregate
+  supertype_namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  subtype_key_value: bucket_sort
+
+  relationships:
+  - name: sorts
+    reference_entity_name: field_sort
+    cardinality: '1..*'
+    aggregate: true
+
+  properties:
+  - name: from
+    description: |
+      Zero-based from index.
+    type: string
+    optional: true
+    domain_type_name: integer_or_placeholder
+
+  - name: variable_from
+    type: boolean
+    snippet: |
+      from?.contains("\${") ?: false
+
+  - name: bucket_size
+    description: |
+      The size of the bucket_sort to be returned.
+    type: string
+    optional: true
+    domain_type_name: integer_or_placeholder
+
+  - name: variable_bucket_size
+    type: boolean
+    snippet: |
+      bucketSize?.contains("\${") ?: false
+
+- name: field_sort
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+
+  properties:
+  - name: field
+    type: string
+    primary_key: true
+
+  - name: order
+    type: string
+    optional: true
+    domain:
+      pattern: |
+        \$\{[^}]*\}|asc|desc
+
+  - name: variable_order
+    type: boolean
+    snippet: |
+      order?.contains("\${") ?: false

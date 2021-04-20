@@ -1,0 +1,43 @@
+{{define "class_name" (concat (upper-camel service.name) "Application") ~}}
+package {{service.namespace}}
+
+import org.springframework.boot.SpringApplication
+import org.springframework.boot.autoconfigure.SpringBootApplication
+{{#if service.datasources ~}}
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+{{/if}}
+{{#if service.depends_on_cache ~}}
+import org.springframework.cache.annotation.EnableCaching
+{{/if}}
+
+/**
+ * The launcher class for the {{service.name}} service.
+ */
+@SpringBootApplication(
+    {{#if service.datasources ~}}
+    exclude=[DataSourceAutoConfiguration::class]
+    {{/if}}
+)
+{{#if service.depends_on_cache ~}}
+@EnableCaching
+{{~/if}}
+class {{class_name}}
+
+/**
+ * The entry point of this service.
+ */
+fun main(args: Array<String>) {
+    {{#if component.enable_debug ~}}
+    SpringApplication({{class_name}}::class.java).apply {
+        setDefaultProperties(mapOf(
+            "search_engine_client.default.endpoints" to "http://localhost:5200",
+            "spring.r2dbc.url" to "r2dbc:pool:postgresql://localhost:5432/test_db",
+            "spring.r2dbc.username" to "test",
+            "spring.r2dbc.spring.r2dbc.password" to "secret",
+        ))
+        run(*args)
+    }
+    {{else}}
+    SpringApplication.run({{class_name}}::class.java, *args)
+    {{/if}}
+}

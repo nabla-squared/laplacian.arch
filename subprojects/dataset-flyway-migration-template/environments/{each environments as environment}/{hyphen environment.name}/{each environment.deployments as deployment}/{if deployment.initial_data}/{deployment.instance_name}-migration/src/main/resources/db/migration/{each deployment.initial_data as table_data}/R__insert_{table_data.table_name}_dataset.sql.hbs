@@ -1,0 +1,81 @@
+{{define 'table_model' table_data.table_model ~}}
+{{define 'column_name_escape_format' (if deployment.isa_mysql_container_deployment '`%s`' '"%s"') ~}}
+{{#*inline "COLUMN_NAME_LIST"}}
+  {{#if ENTITY.owner}}
+  {{#each ENTITY.owner.primary_keys as |pk| ~}}
+  {{printf column_name_escape_format (concat (column-name ENTITY.owned_by.name) '_' (column-name pk.name))}},
+  {{/each}}
+  {{~/if}}
+  {{#each ENTITY.stored_properties as |prop| ~}}
+  {{printf column_name_escape_format (column-name prop.name)}}{{if (not @last)','}}
+  {{/each}}
+{{/inline ~}}
+
+{{#*inline "COLUMN_VALUE"}}
+  {{define 'value' (trim (lookup RECORD PROP.name)) ~}}
+  {{case
+    (eq value null) 'null'
+    (eq PROP.type 'string')  (printf "'%s'" value)
+    (eq PROP.type 'boolean') (if value '1' '0')
+    value
+  ~}}
+{{/inline ~}}
+
+{{#*inline "COLUMN_VALUE_LIST"}}
+  {{#if ENTITY.owner ~}}
+  {{#each ENTITY.owner.primary_keys as |pk| ~}}
+  {{>COLUMN_VALUE
+    RECORD=OWNER_RECORD
+    PROP=pk}},
+  {{/each}}
+  {{~/if}}
+  {{#each ENTITY.stored_properties as |prop| ~}}
+  {{>COLUMN_VALUE
+    RECORD=RECORD
+    PROP=prop}}{{if (not @last) ','}}
+  {{/each}}
+{{/inline ~}}
+
+{{#*inline "INSERT_RECORDS"}}
+INSERT INTO {{TABLE_NAME ~}} (
+  {{>COLUMN_NAME_LIST
+    ENTITY=ENTITY}}
+) VALUES (
+{{#each RECORDS as |record| ~}}
+  {{>COLUMN_VALUE_LIST
+    ENTITY=ENTITY
+    RECORD=record
+    OWNER_RECORD=OWNER_RECORD}}
+){{if @last ';' ', ('}}
+{{/each}}
+{{#if ENTITY.aggregates ~}}
+{{#each RECORDS as |record| ~}}
+{{#each ENTITY.aggregates as |aggregate| ~}}
+  {{define 'aggregated_records' (lookup record aggregate.name) ~}}
+  {{>INSERT_RECORDS
+    ENTITY=aggregate.reference_entity
+    TABLE_NAME=aggregate.reference_entity.table_name
+    RECORDS=aggregated_records
+    OWNER_RECORD=record}}
+{{/each}}
+{{/each}}
+{{~/if}}
+{{/inline ~}}
+
+{{#*inline "DELETE_RECORDS"}}
+DELETE FROM {{TABLE_NAME ~}};
+{{#each ENTITY.aggregates as |aggregate| ~}}
+{{>DELETE_RECORDS
+  ENTITY=aggregate.reference_entity
+  TABLE_NAME=aggregate.reference_entity.table_name}}
+{{/each}}
+{{/inline ~}}
+
+{{>DELETE_RECORDS
+  ENTITY=table_model
+  TABLE_NAME=table_data.table_model.table_name}}
+{{>INSERT_RECORDS
+  ENTITY=table_model
+  TABLE_NAME=table_data.table_model.table_name
+  RECORDS=table_data.dataset.content
+  OWNER_RECORD=null}}

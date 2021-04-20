@@ -1,0 +1,20 @@
+{{define "class_base_name" (upper-camel graphql_type_group) ~}}
+{{define "graphql_types_in_group" (filter service.graphql_types '(eq @it.group graphql_type_group)') ~}}
+{{define "graphql_types_with_root_query" (filter graphql_types_in_group '@it.root_query_fields') ~}}
+"""
+The root query resolver for the {{graphql_type_group}} type group.
+"""
+type {{class_base_name}} {
+  {{#each graphql_types_with_root_query as |graphql_type| ~}}
+  {{#each graphql_type.root_query_fields as |field| ~}}
+  """
+  {{trim field.description}}
+  """
+  {{lower-camel field.name}}{{#if field.arguments}}(
+    {{#each field.arguments as |argument| ~}}
+    {{lower-camel argument.name}}: {{argument.graphql_type}},
+    {{/each}}
+  ){{/if}}: {{field.return_type_in_gql}}
+  {{/each}}
+  {{/each}}
+}

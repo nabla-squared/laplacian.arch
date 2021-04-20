@@ -1,0 +1,96 @@
+{{define "base_package" (concat service.namespace '.rpc.rest') ~}}
+{{define "package" (concat base_package '.' (lower-snake rest_resource.name)) ~}}
+{{define "depends_on_cache" (any rest_resource.operations '@it.effective_cache_policy') ~}}
+{{define "base_class_name" (upper-camel rest_resource.name) ~}}
+{{define "class_name" (concat base_class_name 'RestResourceClient') ~}}
+{{define "config_class_name" (concat base_class_name 'RestResourceConfig') ~}}
+package {{package}}
+
+import org.springframework.stereotype.Component
+import org.springframework.http.HttpMethod
+{{#if depends_on_cache ~}}
+import org.springframework.cache.CacheManager
+{{~/if}}
+import reactor.core.publisher.Mono
+import org.slf4j.*
+
+import {{base_package}}.RestResourceClientBase
+{{#each rest_resource.operations as |operation| ~}}
+import {{package}}.{{lower-snake operation.name}}.*
+{{/each}}
+
+/**
+ * An implementation of the {{upper-camel rest_resource.name}}RestResource interface
+ */
+@Component
+class {{class_name}}(
+    {{#if depends_on_cache ~}}
+    private val cacheManager: CacheManager,
+    {{~/if}}
+    {{#if rest_resource.configurations ~}}
+    private val conf: {{config_class_name}},
+    {{~/if}}
+): RestResourceClientBase(), {{upper-camel rest_resource.name}}RestResource {
+    {{#each rest_resource.operations as |operation| ~}}
+    {{define 'operation_name' (lower-camel operation.name) ~}}
+    {{define 'operation_class_base_name' (upper-camel operation.name) ~}}
+    {{define 'input_class_name' (concat operation_class_base_name 'Input') ~}}
+    {{define 'response_class_name' (concat operation_class_base_name 'Response') ~}}
+    {{define 'cache_policy' operation.effective_cache_policy ~}}
+    /**
+     * {{trim operation.description}}
+     */
+    override fun {{operation_name}}({{#if operation.arguments}}args: {{input_class_name}}{{/if}}): Mono<{{operation.response.type_in_java}}> =
+        {{#if cache_policy ~}}
+        withCache(
+            cacheManager.getCache("{{cache_policy.key}}")!!
+        {{#if operation.arguments ~}}
+        ) { params: {{input_class_name}} -> {{operation_name}}NoCache(params, context) }(input)
+        {{else ~}}
+        ) { _ -> {{operation_name}}NoCache(context) }("")
+        {{/if}}
+
+    private fun {{operation_name}}NoCache({{#if operation.arguments}}args: {{input_class_name}}{{/if}}): Mono<{{operation.response.type_in_java}}> =
+        {{~/if}}
+        client({{dquote rest_resource.base_url}})
+        .method(HttpMethod.{{upper-snake operation.method}})
+        .uri { uri -> uri
+            .path({{dquote operation.path}})
+            {{#each operation.query_parameters as |parameter| ~}}
+            .let { {{if parameter.multiple 'queryParams' 'queryParam'}}(it, {{dquote parameter.name}}, {{trim parameter.value}}) }
+            {{/each}}
+            .build({{#if operation.path_parameters ~}}mapOf(
+                {{#each operation.path_parameters as |param| ~}}
+                {{dquote param.name}} to {{trim param.value}},
+                {{/each}}
+            ){{~/if}})
+        }
+        .let { commonRequestSettings(it) }
+        {{#each operation.http_headers as |header| ~}}
+        .header({{dquote header.name}}, {{trim header.value}})
+        {{/each}}
+        .exchange()
+        .flatMap { response ->
+            {{#if rest_resource.enable_automatic_cookie_handling ~}}
+            Mono.subscriberContext().map { context ->
+                handleResponseCookies(response, context)
+            }.map {
+                response
+            }
+            {{~/if}}
+            {{define "type" operation.response.type}}
+            {{define "cast_to_type" (case
+              operation.response.multiple "List"
+              (eq type "array") "List"
+              (eq type "object") "Map"
+              (eq type "number") "Int"
+              (upper-camel operation.response.type)
+            ) ~}}
+            response.bodyToMono({{cast_to_type}}::class.java) as Mono<{{operation.response.type_in_java}}>
+        }
+    {{/each}}
+
+    companion object {
+        private val LOG: Logger = LoggerFactory.getLogger({{class_name}}::class.java)
+    }
+}

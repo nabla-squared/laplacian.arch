@@ -1,0 +1,52 @@
+{{define "class_base_name" (upper-camel graphql_type.name) ~}}
+{{define "class_name" (concat class_base_name "Document") ~}}
+{{define "model" search_index.document_model ~}}
+package {{service.namespace}}.search.{{lower-snake search_index.name}}
+import org.springframework.data.elasticsearch.annotations.Field
+import java.time.*
+import java.util.*
+
+class {{class_name}} {
+    {{#each model.stored_properties as |property| ~}}
+    {{define 'prop_type' (case
+      (eq property.type 'number') 'Int'
+      (eq property.type 'date') 'String'
+      (eq property.type 'time') 'String'
+      (eq property.type 'datetime') 'String'
+      (upper-camel property.type)
+    ) ~}}
+    {{define 'default_value' (case
+      property.nullable 'null'
+      (eq property.type 'number') '0'
+      (eq property.type 'string') '""'
+      (eq property.type 'date') '""'
+      (eq property.type 'time') '""'
+      (eq property.type 'datetime') '""'
+      '""'
+    ) ~}}
+    @Field(name={{dquote property.name}})
+    var {{lower-camel property.name}}: {{prop_type}}{{if property.nullable '?'}} = {{#if property.default_value}}property.default_value{{else}}{{default_value}}{{/if}}
+    {{/each}}
+
+    {{#if model.primary_keys ~}}
+    override fun equals(other: Any?): Boolean =
+        (other === this) ||
+        (other != null) &&
+        (other is {{class_name}}) &&
+        {{#each model.primary_keys as |pk| ~}}
+        Objects.equals(this.{{lower-camel pk.name}}, other.{{lower-camel pk.name}}){{if (not @last) ' &&'}}
+        {{/each}}
+
+    override fun hashCode(): Int = Objects.hash(
+        {{#each model.primary_keys as |pk| ~}}
+        this.{{lower-camel pk.name}}{{if (not @last) ','}}
+        {{/each}}
+    )
+
+    override fun toString(): String = "{{class_name}}(" +
+        {{#each model.primary_keys as |pk| ~}}
+        {{dquote (concat (lower-camel pk.name) ': ${' (lower-camel pk.name) '}' (if (not @last) ','))}} +
+        {{/each}}
+    ")"
+    {{/if}}
+}

@@ -1,0 +1,33 @@
+entities:
+- name: mybatis_fetcher
+  namespace: laplacian.arch.backend.api.mybatis
+  supertype_name: graphql_field_fetcher
+  supertype_namespace: laplacian.arch.backend.api.graphql
+  subtype_key_value: mybatis
+
+  properties:
+  - name: datasource_name
+    type: string
+    domain_type_name: identifier
+
+  - name: statement_type
+    type: string
+    domain:
+      choices:
+      - value: select
+      - value: insert
+      - value: update
+      - value: delete
+      - value: fragment
+
+  - name: statement
+    type: string
+
+  relationships:
+  - name: datasource
+    reference_entity_name: datasource
+    reference_entity_namespace: laplacian.arch.backend.api.datasource
+    cardinality: '1'
+    mappings:
+    - from: datasource_name
+      to: name

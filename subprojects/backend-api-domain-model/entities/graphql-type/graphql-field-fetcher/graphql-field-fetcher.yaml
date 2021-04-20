@@ -1,0 +1,81 @@
+entities:
+- name: graphql_field_fetcher
+  namespace: laplacian.arch.backend.api.graphql
+
+  properties:
+  - name: type
+    type: string
+    subtype_key: true
+
+  - name: description
+    type: string
+    optional: true
+    default_value: |
+      "The data fetcher for the ${graphqlField.name} field."
+
+  - name: is_batch
+    type: boolean
+    optional: true
+    default_value: |
+      false
+
+  - name: result_selector
+    type: string
+    optional: true
+
+  - name: result_mapper
+    type: string
+    optional: true
+    default_value: |
+      "${graphqlField.recordType}.from(result)"
+
+  - name: cache_policy_name
+    type: string
+    optional: true
+
+  - name: java_interface
+    type: string
+    snippet: |
+      if (isBatch) "${javaInterfaceName}<${graphqlField.contextType}, ${graphqlField.recordType}>"
+      else "${javaInterfaceName}<${graphqlField.recordType}>"
+
+  - name: java_interface_name
+    type: string
+    snippet: |
+      when {
+        (isBatch && graphqlField.multiple) -> "ListValueFieldBatchFetcher"
+        (isBatch && !graphqlField.multiple) -> "FieldBatchFetcher"
+        (!isBatch && graphqlField.multiple) -> "ListValueFieldFetcher"
+        (!isBatch && !graphqlField.multiple) -> "FieldFetcher"
+        else -> ""
+      }
+
+  relationships:
+  - name: graphql_field
+    reference_entity_name: graphql_field
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '1'
+    reverse_of: fetcher
+
+  - name: graphql_field_arguments
+    reference_entity_name: api_call_argument
+    reference_entity_namespace: laplacian.arch.backend.api
+    cardinality: '*'
+    snippet: |
+      graphqlField.arguments
+
+  - name: graphql_type
+    reference_entity_name: graphql_type
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '1'
+    snippet: |
+      graphqlField.graphqlType
+
+  - name: cache_policy
+    reference_entity_name: cache_policy
+    reference_entity_namespace: laplacian.arch.backend.api.cache
+    cardinality: '0..1'
+    mappings:
+    - from: cache_policy_name
+      to: name
+

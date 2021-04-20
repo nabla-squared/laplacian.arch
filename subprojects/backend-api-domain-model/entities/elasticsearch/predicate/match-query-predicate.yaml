@@ -1,0 +1,12 @@
+entities:
+- name: match_query_predicate
+  namespace: laplacian.arch.backend.api.elasticsearch.query
+  supertype_name: elasticsearch_query_predicate
+  subtype_key_value: match
+
+  properties:
+  - name: field
+    type: string
+
+  - name: value
+    type: string

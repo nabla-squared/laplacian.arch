@@ -1,0 +1,9 @@
+{{#if service.datasources ~}}
+management.health.datasource.enabled=false
+{{~/if}}
+{{#if service.depends_on_elasticsearch ~}}
+management.health.elasticsearch.enabled=false
+{{~/if}}
+{{#each service.blocking_datasources as |datasource| ~}}
+datasource.{{hyphen datasource.name}}.hikari.auto-commit=false
+{{/each}}

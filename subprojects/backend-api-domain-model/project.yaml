@@ -1,0 +1,18 @@
+project:
+  group: laplacian-arch
+  name: backend-api-domain-model
+  type: domain-model
+  namespace: laplacian.arch.backend.api
+  version: '1.0.0'
+  description:
+    en: |
+      A domain model that represents the logical structure of API services.
+      This model is based on the REST resource model,
+      GraphQL interface definition model, and the data source access model.
+    ja: |
+      APIサービスの論理構造を表すドメインモデルです。
+      このモデルは、RESTリソース、GraphQLインタフェース定義モデルおよび、
+      データソースアクセスモデルによって構成されます。
+    zh: |
+      一种表示API服务逻辑结构的领域模型。
+      该模型基于REST资源模型、GraphQL接口定义模型和数据源访问模型。

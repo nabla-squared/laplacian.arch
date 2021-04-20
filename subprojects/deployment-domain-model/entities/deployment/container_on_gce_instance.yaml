@@ -1,0 +1,18 @@
+entities:
+- name: container_on_gce_instance
+  namespace: laplacian.arch.deployment
+  supertype_name: deployment
+  supertype_namespace: laplacian.arch.deployment
+
+  properties:
+  - name: machine_type
+    type: string
+    optional: true
+    default_value: |
+      "f1-micro"
+    domain:
+      choices:
+      - label: f1-micro
+        value: f1-micro
+      - label: g1-small
+        value: g1-small

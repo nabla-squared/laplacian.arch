@@ -1,0 +1,29 @@
+{{define 'model' graphql_type.data_model ~}}
+{{define 'aggregates' graphql_field.referencing_graphql_type.data_model.aggregates ~}}
+{{define 'context_type' graphql_field.context_type}}
+{{define 'arguments' (join (filter (list-of
+  (if fetcher.is_batch 'keys' (if context_type 'self'))
+  (if graphql_field.arguments 'args')
+) '@it') ', ')}}
+        return mono {
+            repository.{{lower-camel graphql_field.name}}({{arguments}})
+        }
+        {{#if aggregates ~}}
+        .map { records ->
+            records
+            .groupBy { mapOf(
+                {{#each model.primary_keys as |pk| ~}}
+                {{define 'pk_name' (lower-camel pk.name) ~}}
+                "{{pk_name}}" to it["{{pk_name}}"],
+                {{/each}}
+            )}
+            .map { (k, v) -> k + mapOf(
+                {{#each aggregates as |aggregate| ~}}
+                {{define 'aggregate_name' (lower-camel aggregate.name) ~}}
+                "{{aggregate_name}}" to v.fold(mutableListOf<Map<String, Any?>>()) { acc, map -> acc.apply {
+                    if (map.containsKey("{{aggregate_name}}")) add(map["{{aggregate_name}}"] as Map<String, Any?>)
+                }}
+                {{/each}}
+            )}
+        }
+        {{~/if}}

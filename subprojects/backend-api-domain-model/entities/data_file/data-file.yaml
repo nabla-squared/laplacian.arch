@@ -1,0 +1,33 @@
+entities:
+- name: data_file
+  namespace: laplacian.arch.backend.api.data_file
+
+  properties:
+  - name: name
+    type: string
+    domain_type_name: identifier
+    primary_key: true
+
+  - name: description
+    type: string
+    optional: true
+    default_value: |
+      "Data file of ${name} in ${format}"
+
+  - name: format
+    type: string
+    optional: true
+    default_value: |
+      "json"
+    domain:
+      choices:
+      - value: json
+      - value: yaml
+      - value: csv
+
+  - name: default_path
+    type: string
+    optional: true
+    domain_type_name: file_path
+    default_value: |
+      "./data/${name.lowerHyphenize()}.${format}"

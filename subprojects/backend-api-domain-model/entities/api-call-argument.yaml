@@ -1,0 +1,75 @@
+entities:
+- name: api_call_argument
+  namespace: laplacian.arch.backend.api
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: type
+    type: string
+    domain:
+      choices:
+      - value: string
+      - value: int
+      - value: float
+      - value: boolean
+      - value: date
+      - value: time
+      - value: datetime
+
+  - name: description
+    type: string
+    optional: true
+    default_value: |
+      "${name}"
+
+  - name: required
+    type: boolean
+    optional: true
+    default_value: |
+      false
+
+  - name: multiple
+    type: boolean
+    optional: true
+    default_value: |
+      false
+
+  - name: nullable
+    type: boolean
+    snippet: |
+      !multiple && !required && !containsKey("default_value")
+
+  - name: default_value
+    type: string
+    optional: true
+    default_value: |
+      if (nullable) "null"
+      else if (multiple) "emptyList()"
+      else when(type) {
+          "boolean" -> "false"
+          "int" -> "0"
+          "double" -> "0"
+          "float" -> "0f"
+          else -> "\"\""
+      }
+
+  - name: class_name
+    type: string
+    snippet: |
+      when(type) {
+          "boolean" -> "Boolean"
+          "int" -> "Int"
+          "float" -> "Float"
+          else -> "String"
+      }.let { if (multiple) "List<${it}>" else it }
+
+  - name: graphql_type
+    type: string
+    snippet: |
+      when(type) {
+          "datetime" -> "DateTime"
+          else -> type.upperCamelize()
+      }.let { if (multiple) "[${it}!]" else it }

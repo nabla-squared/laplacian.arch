@@ -1,0 +1,23 @@
+{{define "class_base_name" (upper-camel (concat search_index.name ' ' query.name)) ~}}
+package {{service.namespace}}.search.{{lower-snake search_index.name}}.{{lower-snake query.name}}
+
+import {{service.namespace}}.query.*
+import {{service.namespace}}.util.*
+import java.time.*
+
+data class {{upper-camel class_base_name}}Input (
+    {{#each query.parameters as |parameter| ~}}
+    val {{lower-camel parameter.name}}: {{parameter.class_name}}{{if parameter.nullable "?" }} = {{trim parameter.default_value}},
+    {{/each}}
+) {
+    companion object {
+        fun from(args: Map<String, Any?>): {{class_base_name}}Input {
+            return {{class_base_name}}Input(
+                {{#each query.parameters as |argument| ~}}
+                {{define "name" (lower-camel argument.name) ~}}
+                {{name}} = args["{{name}}"] as? {{argument.class_name}}{{#if (not argument.nullable)}} ?: {{trim argument.default_value}}{{/if}},
+                {{/each}}
+            )
+        }
+    }
+}

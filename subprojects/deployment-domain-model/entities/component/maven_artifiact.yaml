@@ -1,0 +1,20 @@
+entities:
+- name: maven_artifact
+  namespace: laplacian.arch.deployment.component
+
+  properties:
+  - name: group
+    type: string
+    primary_key: true
+
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: version
+    type: string
+
+  - name: gradle_dependency_entry
+    type: string
+    snippet: |
+      "${group}:${name}:${version}"

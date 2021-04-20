@@ -1,0 +1,85 @@
+{{define 'class_base_name' (upper-camel graphql_field.name) ~}}
+{{define 'fetcher_class_name' (concat class_base_name 'FieldFetcher') ~}}
+{{define 'arguments_class_name' (concat class_base_name 'FieldArguments') ~}}
+{{define 'config_class_name' (concat (upper-camel graphql_type.name) 'ResolverConfig') ~}}
+{{define 'record_class_name' (upper-camel graphql_type.name) ~}}
+{{define 'base_package' (concat service.namespace '.graphql.type_resolver') ~}}
+{{define 'graphql_type_package' (concat base_package '.' graphql_type.fqn) ~}}
+{{define 'selector' fetcher.result_selector ~}}
+{{define 'mapper' fetcher.result_mapper ~}}
+{{define 'context_type' graphql_field.context_type ~}}
+{{define 'return_type' graphql_field.return_type ~}}
+{{define 'package'  (concat graphql_type_package '.' (lower-snake graphql_field.name)) ~}}
+package {{package}}
+
+import org.springframework.stereotype.Component
+import graphql.schema.DataFetchingEnvironment
+import reactor.core.publisher.Mono
+{{#if fetcher.is_batch ~}}
+import reactor.kotlin.core.publisher.toMono
+{{~/if}}
+import {{graphql_type_package}}.*
+import {{service.namespace}}.util.*
+{{#if (not (eq graphql_type graphql_field.referencing_graphql_type)) ~}}
+{{define 'ref_type' graphql_field.referencing_graphql_type ~}}
+{{define 'graphql_type_package' (concat service.namespace '.graphql.type_resolver.' ref_type.fqn) ~}}
+import {{graphql_type_package}}.*
+{{~/if}}
+import {{base_package}}.{{fetcher.java_interface_name}}
+// @import_statements@
+// @import_statements@
+/**
+ * The fetcher of the {{graphql_field.name}} of the {{graphql_type.name}}.
+ */
+@Component("{{graphql_field.fqn}}.fetcher")
+class {{fetcher_class_name}}(
+    // @injections@
+    // @injections@
+    {{#if graphql_type.configurations ~}}
+    val conf: {{config_class_name}},
+    {{~/if}}
+): {{fetcher.java_interface}} {
+    {{#if (not fetcher.is_batch) ~}}
+    /**
+     * Fetches the content of the {{graphql_field.name}} field.
+     */
+    override fun fetch(environment: DataFetchingEnvironment): Mono<{{return_type}}> {
+        {{#if context_type ~}}
+        val self: {{context_type}} = environment.getSource()
+        {{~/if}}
+        {{#if graphql_field.arguments ~}}
+        val args = {{arguments_class_name}}.from(environment.arguments)
+        {{~/if}}
+        // @fetch_execution@
+        // @fetch_execution@
+        .map { result ->
+            {{shift mapper 12}}
+        }
+        {{#if selector ~}}
+        .map { results ->
+            results.{{if graphql_field.multiple 'filter' 'find'}} { result ->
+                {{shift selector 16}}
+            }
+        }
+        {{~/if}}
+    }
+    {{else ~}}
+    /**
+     * Load the content of the {{graphql_field.name}} field in batch.
+     */
+    override fun load(keys: List<{{context_type}}>): Mono<List<{{return_type}}>> {
+        // @fetch_execution@
+        // @fetch_execution@
+        .map { result ->
+            {{shift mapper 12}}
+        }
+        {{#if selector ~}}
+        .map { results ->
+            results.{{if graphql_field.multiple 'filter' 'find'}} { result ->
+                {{shift selector 16}}
+            }
+        }
+        {{~/if}}
+    }
+    {{~/if}}
+}

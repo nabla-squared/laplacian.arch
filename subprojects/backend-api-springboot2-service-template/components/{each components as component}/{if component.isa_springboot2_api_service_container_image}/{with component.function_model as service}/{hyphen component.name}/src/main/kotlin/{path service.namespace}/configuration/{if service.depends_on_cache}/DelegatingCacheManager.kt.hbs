@@ -1,0 +1,28 @@
+package {{service.namespace}}.configuration
+
+import org.springframework.cache.CacheManager
+import org.springframework.cache.Cache
+{{#if service.depends_on_redis_cache ~}}
+import org.springframework.data.redis.cache.RedisCacheManager
+{{~/if}}
+import org.springframework.cache.caffeine.CaffeineCacheManager
+import org.slf4j.*
+
+class DelegatingCacheManager(
+    val caffeineCacheManagers: Map<String, CaffeineCacheManager>,
+    {{#if service.depends_on_redis_cache ~}}
+    val redisCacheManager: RedisCacheManager,
+    {{~/if}}
+): CacheManager {
+
+    override fun getCacheNames(): Collection<String> =
+        caffeineCacheManagers.keys{{#if service.depends_on_redis_cache}} + redisCacheManager.cacheNames{{/if}}
+
+    override fun getCache(cacheName: String): Cache? = when {
+        {{#if service.depends_on_redis_cache ~}}
+        cacheName.startsWith("redis:") -> redisCacheManager.getCache(cacheName)
+        {{~/if}}
+        caffeineCacheManagers.containsKey(cacheName) -> caffeineCacheManagers[cacheName]!!.getCache(cacheName)
+        else -> throw IllegalArgumentException("Unknown cache name: ${cacheName}")
+    }
+}

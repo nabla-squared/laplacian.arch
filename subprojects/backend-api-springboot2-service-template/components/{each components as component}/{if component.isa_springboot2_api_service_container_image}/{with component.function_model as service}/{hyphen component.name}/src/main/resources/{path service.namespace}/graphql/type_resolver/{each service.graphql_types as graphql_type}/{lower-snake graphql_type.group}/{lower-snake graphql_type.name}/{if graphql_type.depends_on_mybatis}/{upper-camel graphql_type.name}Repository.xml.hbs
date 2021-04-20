@@ -1,0 +1,18 @@
+{{define 'class_base_name' (upper-camel graphql_type.name) ~}}
+{{define 'repository_class_name' (concat class_base_name 'Repository') ~}}
+{{define 'base_package' (concat service.namespace '.graphql.type_resolver') ~}}
+{{define 'package' (concat base_package '.' graphql_type.fqn) ~}}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="{{graphql_type.fqn}}">
+  {{#each graphql_type.mybatis_field_fetchers as |fetcher| ~}}
+  {{define 'field' fetcher.graphql_Field ~}}
+  {{define 'ref_type' field.referencing_graphql_type ~}}
+  <!--
+  {{trim field.description}}
+  -->
+  <{{fetcher.statement_type}} id="{{lower-camel field.name}}" {{#if ref_type ~}}resultType="hashmap"{{/if}}>
+  {{shift fetcher.statement 2}}
+  </{{fetcher.statement_type}}>
+  {{/each}}
+</mapper>

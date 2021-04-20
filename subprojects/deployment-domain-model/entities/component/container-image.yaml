@@ -1,0 +1,54 @@
+entities:
+- name: container_image
+  namespace: laplacian.arch.deployment.component.container
+  supertype_name: component
+  supertype_namespace: laplacian.arch.deployment.component
+
+  properties:
+  - name: base_name
+    type: string
+    optional: true
+    default_value: |
+      name.lowerHyphenize()
+
+  - name: custom_built
+    type: boolean
+    optional: true
+    default_value: |
+      false
+
+  relationships:
+  - name: environment_variables
+    reference_entity_name: environment_variable_definition
+    reference_entity_namespace: laplacian.arch.deployment.component.container
+    cardinality: '*'
+    aggregate: true
+
+- name: environment_variable_definition
+  namespace: laplacian.arch.deployment.component.container
+  properties:
+  - name: name
+    type: string
+    domain_type_name: identifier
+    primary_key: true
+
+  - name: description
+    type: string
+    optional: true
+    default_value: |
+      name
+
+  - name: optional
+    type: boolean
+    optional: true
+    default_value: |
+      false
+
+  - name: default_value
+    type: string
+
+  - name: multiple
+    type: boolean
+    optional: true
+    default_value: |
+      false

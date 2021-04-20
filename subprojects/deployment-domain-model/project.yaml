@@ -1,0 +1,13 @@
+project:
+  group: laplacian-arch
+  name: deployment-domain-model
+  type: domain-model
+  namespace: laplacian.arch.deployment
+  version: '1.0.0'
+  description:
+    en: |
+      This model represents the deployment configuration of a system.
+    ja: |
+      システムのデプロイメント構成を表すモデルです。
+    zh: |
+      该模型表示系统的部署配置。

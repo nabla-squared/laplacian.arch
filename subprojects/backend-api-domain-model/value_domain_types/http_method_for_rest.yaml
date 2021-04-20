@@ -1,0 +1,11 @@
+value_domain_types:
+- name: http_method_for_rest
+  namespace: laplacian.arch.backend.api
+  type: string
+  domain:
+    choices:
+    - value: GET
+    - value: POST
+    - value: PUT
+    - value: PATCH
+    - value: DELETE

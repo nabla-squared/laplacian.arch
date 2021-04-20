@@ -1,0 +1,49 @@
+{{define 'class_base_name' (upper-camel member_type_model.name) ~}}
+{{define 'class_name' class_base_name ~}}
+{{define 'model' member_type_model ~}}
+{{define 'package' (concat service.namespace '.graphql.type_resolver.' (lower-snake graphql_type.group) '.' (lower-snake graphql_type.name)) ~}}
+package {{package}}
+
+/**
+ * A data class for a {{graphql_type.name}} record.
+ */
+data class {{class_name}}(
+    {{#each model.stored_properties as |property| ~}}
+    /**
+     * {{trim property.description}}
+     */
+    val {{lower-camel property.name}}: {{property.class_name}}{{if property.nullable '?'}},
+    {{/each}}
+    {{#each model.aggregates as |aggregate| ~}}
+    val {{lower-camel aggregate.name}}: {{aggregate.class_name}}{{if aggregate.nullable '?'}},
+    {{/each}}
+) {
+    companion object {
+        /**
+         * Creates a {{graphql_type.name}} instance from the given map.
+         */
+        @JvmStatic
+        fun from(record: Map<String, Any?>): {{class_name}} = {{class_name}}(
+            {{#each model.stored_properties as |property| ~}}
+            {{#if (eq (lower-camel property.name) (lower-snake property.name)) ~}}
+            {{lower-camel property.name}} = record["{{lower-camel property.name}}"] as {{property.class_name}}{{if property.nullable '?'}},
+            {{else}}
+            {{lower-camel property.name}} = (record["{{lower-camel property.name}}"] ?: record["{{lower-snake property.name}}"]) as {{property.class_name}}{{if property.nullable '?'}},
+            {{~/if}}
+            {{/each}}
+            {{#each model.aggregates as |aggregate| ~}}
+            {{#if (eq (lower-camel aggregate.name) (lower-snake aggregate.name)) ~}}
+            {{lower-camel aggregate.name}} = ((record["{{lower-camel aggregate.name}}"] ?: emptyList<Map<String, Any?>>()) as List<Map<String, Any?>>).map{ {{upper-camel aggregate.reference_entity.name}}.from(it) },
+            {{else}}
+            {{lower-camel aggregate.name}} = ((record["{{lower-camel aggregate.name}}"] ?: record["{{lower-snake aggregate.name}}"] ?: emptyList<Map<String, Any?>>()) as List<Map<String, Any?>>).map{ {{upper-camel aggregate.reference_entity.name}}.from(it) },
+            {{~/if}}
+            {{/each}}
+        )
+
+        /**
+         * Creates a set of {{graphql_type.name}} instances from the given records.
+         */
+        @JvmStatic
+        fun from(records: List<Map<String, Any?>>): List<{{class_name}}> = records.map { from(it) }
+    }
+}

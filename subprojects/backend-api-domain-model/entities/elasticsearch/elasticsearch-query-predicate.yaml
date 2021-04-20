@@ -1,0 +1,9 @@
+entities:
+- name: elasticsearch_query_predicate
+  namespace: laplacian.arch.backend.api.elasticsearch.query
+
+  properties:
+  - name: type
+    type: string
+    primary_key: true
+    subtype_key: true

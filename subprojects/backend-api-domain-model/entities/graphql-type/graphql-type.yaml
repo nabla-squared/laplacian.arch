@@ -1,0 +1,127 @@
+entities:
+- name: graphql_type
+  namespace: laplacian.arch.backend.api.graphql
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: group
+    type: string
+    optional: true
+    primary_key: true
+
+  - name: description
+    type: string
+    optional: true
+    default_value: |
+      "A Graphql type representing ${name}"
+
+  - name: data_model_name
+    type: string
+    optional: true
+
+  - name: data_model_namespace
+    type: string
+    optional: true
+
+  - name: depends_on_mybatis
+    type: boolean
+    snippet: |
+      fields.any{ it.fetcher?.type == "mybatis" ?: false }
+
+  - name: fqn
+    type: string
+    snippet: |
+      "${if (group != null) "${group!!.lowerUnderscorize()}." else ""}${name.lowerUnderscorize()}"
+
+  - name: graphql_type_name
+    type: string
+    snippet: |
+      fqn.upperCamelize()
+
+  relationships:
+  - name: data_model
+    reference_entity_name: entity
+    reference_entity_namespace: laplacian.metamodel
+    cardinality: '0..1'
+    mappings:
+    - from: data_model_name
+      to: name
+    - from: data_model_namespace
+      to: namespace
+
+  - name: fields
+    reference_entity_name: graphql_field
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '*'
+    aggregate: true
+
+  - name: configurations
+    reference_entity_name: configuration_binding
+    reference_entity_namespace: laplacian.arch.backend.api
+    cardinality: '*'
+    aggregate: true
+
+  - name: query_fields
+    reference_entity_name: graphql_field
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '*'
+    snippet: |
+      fields.filter{ it.operationType == "query" }
+
+  - name: root_query_fields
+    reference_entity_name: graphql_field
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '*'
+    snippet: |
+      queryFields.filter{ it.rootField }
+
+  - name: mutation_fields
+    reference_entity_name: graphql_field
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '*'
+    snippet: |
+      fields.filter{ it.operationType == "mutation" }
+
+  - name: root_mutation_fields
+    reference_entity_name: graphql_field
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '*'
+    snippet: |
+      mutationFields.filter{ it.rootField }
+
+  - name: subscription_fields
+    reference_entity_name: graphql_field
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '*'
+    snippet: |
+      fields.filter{ it.operationType == "subscription" }
+
+  - name: root_subscription_fields
+    reference_entity_name: graphql_field
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '*'
+    snippet: |
+      subscriptionFields.filter{ it.rootField }
+
+  - name: referencing_graphql_types
+    reference_entity_name: graphql_type
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '*'
+    snippet: |
+      fields
+      .filterIsInstance<GraphqlTypeReference>()
+      .map{ it.referencingGraphqlType }
+      .filter{ it != this }
+      .distinct()
+
+  - name: mybatis_field_fetchers
+    reference_entity_name: mybatis_fetcher
+    reference_entity_namespace: laplacian.arch.backend.api.mybatis
+    cardinality: '*'
+    snippet: |
+      fields
+      .mapNotNull{ it.fetcher }
+      .filterIsInstance<MybatisFetcher>()

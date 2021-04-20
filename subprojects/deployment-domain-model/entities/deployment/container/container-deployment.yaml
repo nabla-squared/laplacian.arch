@@ -1,0 +1,108 @@
+entities:
+- name: container_deployment
+  namespace: laplacian.arch.deployment.container
+  supertype_name: deployment
+  supertype_namespace: laplacian.arch.deployment
+
+  properties:
+  - name: instance_name
+    type: string
+    optional: true
+    default_value: |
+      component.name.lowerHyphenize()
+
+  - name: tag
+    type: string
+    optional: true
+    default_value: |
+      "latest"
+
+  - name: container_registry
+    type: string
+    optional: true
+    default_value: |
+      ""
+
+  - name: container_image_name
+    type: string
+    snippet: |
+      "${containerRegistry}${if (containerRegistry.isNotBlank()) "/" else ""}${containerImage.baseName}:${tag}"
+
+
+  - name: use_locally_built_image
+    type: boolean
+    optional: true
+    default_value: |
+      true
+
+  relationships:
+  - name: environment_variables
+    reference_entity_name: environment_variable_assignment
+    reference_entity_namespace: laplacian.arch.deployment.container
+    cardinality: '*'
+    aggregate: true
+
+  - name: data_files
+    reference_entity_name: data_file
+    reference_entity_namespace: laplacian.arch.deployment.container
+    cardinality: '*'
+    aggregate: true
+
+  - name: container_image
+    reference_entity_name: container_image
+    reference_entity_namespace: laplacian.arch.deployment.component.container
+    cardinality: '1'
+    snippet: |
+      component as ContainerImage
+
+- name: data_file
+  namespace: laplacian.arch.deployment.container
+
+  properties:
+  - name: filename
+    type: string
+    primary_key: true
+
+  - name: dir
+    type: string
+    optional: true
+    default_value: |
+      "data"
+
+  - name: dataset_name
+    type: string
+
+  relationships:
+  - name: dataset
+    cardinality: '1'
+    reference_entity_name: dataset
+    reference_entity_namespace: laplacian.arch.deployment
+    mappings:
+    - from: dataset_name
+      to: name
+
+- name: environment_variable_assignment
+  namespace: laplacian.arch.deployment.container
+
+  properties:
+  - name: name
+    type: string
+    domain_type_name: identifier
+    primary_key: true
+
+  - name: value
+    type: string
+
+  relationships:
+  - name: container_deployment
+    reference_entity_name: container_deployment
+    reference_entity_namespace: laplacian.arch.deployment.container
+    cardinality: '1'
+    reverse_of: environment_variables
+
+  - name: definition
+    reference_entity_name: environment_variable_definition
+    reference_entity_namespace: laplacian.arch.deployment.component.container
+    cardinality: '1'
+    snippet: |
+      containerDeployment.containerImage.environmentVariables.find{ it.name == name }!!

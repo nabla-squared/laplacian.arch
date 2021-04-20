@@ -1,0 +1,85 @@
+{{define "class_base_name" (upper-camel (concat search_index.name ' ' query.name)) ~}}
+package {{service.namespace}}.search.{{lower-snake search_index.name}}.{{lower-snake query.name}}
+import java.time.*
+
+class {{upper-camel class_base_name}}Data {
+    {{#*inline 'AGGREGATE_DATA_STRUCTURE'}}
+    {{define 'AGGREGATE_TYPE' AGGREGATE.aggregation_type ~}}
+    {{#if (or
+      (eq AGGREGATE_TYPE 'date_range')
+      (eq AGGREGATE_TYPE 'filters')
+    )~}}
+    var {{lower-camel AGGREGATE.name}}: {{upper-camel AGGREGATE.name}}? = null
+    /**
+     * {{AGGREGATE.name}}
+     */
+    inner class {{upper-camel AGGREGATE.name}} {
+        {{#if (eq AGGREGATE_TYPE 'date_range') ~}}
+        var docCount: Long? = null
+        {{#each AGGREGATE.ranges as |range| ~}}
+        var {{lower-camel range.key}}: Entry? = null
+        {{/each}}
+        {{else if (eq AGGREGATE_TYPE 'filters')~}}
+        {{#each AGGREGATE.filters as |filter| ~}}
+        var {{lower-camel filter.key}}: Entry? = null
+        {{/each}}
+        {{/if}}
+
+        /**
+         * Data in a range of the {{AGGREGATE.name}}
+         */
+        inner class Entry {
+            var docCount: Long? = null
+            {{#each AGGREGATE.sub_aggregates as |sub_aggregate| ~}}
+            {{#shift width=8}}
+            {{> AGGREGATE_DATA_STRUCTURE AGGREGATE=sub_aggregate}}
+            {{/shift}}
+            {{/each}}
+        }
+    }
+    {{else if (or
+      (eq AGGREGATE_TYPE 'terms')
+      (eq AGGREGATE_TYPE 'date_histogram')
+    ) ~}}
+    var {{lower-camel AGGREGATE.name}}: List<{{upper-camel AGGREGATE.name}}Entry> = emptyList()
+    /**
+     * The data structure of each entry in the {{AGGREGATE.name}}
+     */
+    inner class {{upper-camel AGGREGATE.name}}Entry {
+        var docCount: Long? = null
+        var {{lower-camel AGGREGATE.field}}: String? = null
+        {{#each AGGREGATE.sub_aggregates as |sub_aggregate| ~}}
+        {{#shift width=4}}
+        {{> AGGREGATE_DATA_STRUCTURE AGGREGATE=sub_aggregate}}
+        {{/shift}}
+        {{/each}}
+    }
+    {{else if (eq AGGREGATE_TYPE 'filter') ~}}
+    {{~#if AGGREGATE.sub_aggregates ~}}
+    var {{lower-camel AGGREGATE.name}}: {{upper-camel AGGREGATE.name}}? = null
+    /**
+     * {{AGGREGATE.name}}
+     */
+    inner class {{upper-camel AGGREGATE.name}} {
+        var docCount: Long? = null
+        {{#each AGGREGATE.sub_aggregates as |sub_aggregate| ~}}
+        {{#shift width=4}}
+        {{> AGGREGATE_DATA_STRUCTURE AGGREGATE=sub_aggregate}}
+        {{/shift}}
+        {{/each}}
+    }
+    {{else}}
+    var {{lower-camel AGGREGATE.name}}: Long? = null
+    {{/if}}
+    {{else if (or
+      (eq AGGREGATE_TYPE 'bucket_selector')
+      (eq AGGREGATE_TYPE 'bucket_sort')
+    ) ~}}
+    {{else}}
+    var {{lower-camel AGGREGATE.name}}: Double? = null
+    {{/if}}
+    {{/inline}}
+    {{#each query.aggregates as |aggregate| ~}}
+    {{> AGGREGATE_DATA_STRUCTURE AGGREGATE=aggregate}}
+    {{/each}}
+}

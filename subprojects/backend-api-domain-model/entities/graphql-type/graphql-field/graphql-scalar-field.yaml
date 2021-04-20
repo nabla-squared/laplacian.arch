@@ -1,0 +1,26 @@
+entities:
+- name: graphql_scalar_field
+  namespace: laplacian.arch.backend.api.graphql
+  supertype_name: graphql_field
+  supertype_namespace: laplacian.arch.backend.api.graphql
+  subtype_key_value: scalar
+
+  properties:
+  - name: value_type
+    type: string
+    domain:
+      choices:
+      - value: string
+      - value: int
+      - value: float
+
+  - name: record_type
+    type: string
+    snippet: |
+      when (valueType) {
+          "string" -> "String"
+          "int" -> "Int"
+          "float" -> "Float"
+          else -> "Any"
+      }
+

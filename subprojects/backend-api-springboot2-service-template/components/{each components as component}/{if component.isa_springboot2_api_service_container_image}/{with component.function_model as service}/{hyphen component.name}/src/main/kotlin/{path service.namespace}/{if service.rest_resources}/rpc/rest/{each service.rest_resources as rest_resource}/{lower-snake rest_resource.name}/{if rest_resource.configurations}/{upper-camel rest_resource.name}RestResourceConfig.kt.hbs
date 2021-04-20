@@ -1,0 +1,16 @@
+{{define "base_package" (concat service.namespace '.rpc.rest') ~}}
+{{define "package" (concat base_package '.' (lower-snake rest_resource.name)) ~}}
+{{define "base_class_name" (upper-camel rest_resource.name) ~}}
+{{define "config_class_name" (concat base_class_name 'RestResourceConfig') ~}}
+package {{package}}
+
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
+
+@Component
+data class {{config_class_name}}(
+    {{#each rest_resource.configurations as |config| ~}}
+    @Value("{{concat '\${' config.definition.key '}'}}")
+    val {{config.variable_name}}: {{upper-camel config.definition.type}},
+    {{/each}}
+)

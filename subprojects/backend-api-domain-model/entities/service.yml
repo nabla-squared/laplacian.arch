@@ -1,0 +1,200 @@
+entities:
+- name: service
+  namespace: laplacian.arch.backend.api
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: version
+    type: string
+
+  - name: namespace
+    type: string
+    domain_type_name: namespace
+    optional: true
+    default_value: |
+      "${_context.get("project.namespace")}.service.${name.lowerUnderscorize()}"
+
+  - name: description
+    type: string
+    optional: true
+    default_value: |
+      name
+
+  - name: graphql_type_groups
+    type: string
+    multiple: true
+    snippet: |
+      graphqlTypes.map{ it.group }.filterNotNull().distinct()
+
+  - name: depends_on_elasticsearch
+    type: boolean
+    snippet: |
+      elasticsearchIndexes.isNotEmpty()
+
+  - name: depends_on_cache
+    type: boolean
+    snippet: |
+      cachePolicies.isNotEmpty()
+
+  - name: depends_on_data_file
+    type: boolean
+    snippet: |
+      dataFiles.isNotEmpty()
+
+  - name: depends_on_redis_cache
+    type: boolean
+    snippet: |
+      redisCachePolicies.isNotEmpty()
+
+  - name: depends_on_mybatis
+    type: boolean
+    snippet: |
+      graphqlTypes.any{ it.dependsOnMybatis }
+
+  - name: depends_on_blocking_postgres_datasource
+    type: boolean
+    snippet: |
+      blockingDatasources.any { it.dbType == "postgres" }
+
+  - name: depends_on_blocking_mysql_datasource
+    type: boolean
+    snippet: |
+      blockingDatasources.any { it.dbType == "mysql" }
+
+  - name: depends_on_blocking_oracle_datasource
+    type: boolean
+    snippet: |
+      blockingDatasources.any { it.dbType == "oracle" }
+
+  - name: has_custom_logic
+    type: boolean
+    snippet: |
+      graphqlFieldFetchers.any{ it.type == "custom" }
+
+  - name: instrumentations
+    type: string
+    multiple: true
+    optional: true
+
+  relationships:
+  - name: datasource_entries
+    cardinality: '*'
+    reference_entity_name: datasource_entry
+    reference_entity_namespace: laplacian.arch.backend.api.datasource
+    aggregate: true
+
+  - name: datasources
+    cardinality: '*'
+    reference_entity_name: datasource
+    reference_entity_namespace: laplacian.arch.backend.api.datasource
+    snippet: |
+      datasourceEntries.map{ it.datasource }.distinct()
+
+  - name: blocking_datasources
+    cardinality: '*'
+    reference_entity_name: datasource
+    reference_entity_namespace: laplacian.arch.backend.api.datasource
+    snippet: |
+      datasources.filter{ !it.nonBlocking }
+
+  - name: non_blocking_datasources
+    cardinality: '*'
+    reference_entity_name: datasource
+    reference_entity_namespace: laplacian.arch.backend.api.datasource
+    snippet: |
+      datasources.filter{ it.nonBlocking }
+
+  - name: graphql_type_entries
+    cardinality: '*'
+    reference_entity_name: graphql_type_entry
+    aggregate: true
+
+  - name: graphql_types
+    cardinality: '*'
+    reference_entity_name: graphql_type
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    snippet: |
+      graphqlTypeEntries.map{ it.graphqlType }.distinct()
+
+  - name: root_graphql_types
+    cardinality: '*'
+    reference_entity_name: graphql_type
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    snippet: |
+      graphqlTypes.filter{ it.group == null }
+
+  - name: elasticsearch_indexes
+    reference_entity_name: elasticsearch_index
+    reference_entity_namespace: laplacian.arch.backend.api.elasticsearch
+    cardinality: '*'
+    snippet: |
+      listOf<ElasticsearchIndex>()
+
+  - name: graphql_fields
+    reference_entity_name: graphql_field
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '*'
+    snippet: |
+      graphqlTypes
+      .flatMap{ it.fields ?: emptyList() }
+
+  - name: graphql_field_fetchers
+    reference_entity_name: graphql_field_fetcher
+    reference_entity_namespace: laplacian.arch.backend.api.graphql
+    cardinality: '*'
+    snippet: |
+      graphqlFields.map{ it.fetcher }.filterNotNull()
+
+  - name: cache_policies
+    reference_entity_name: cache_policy
+    reference_entity_namespace: laplacian.arch.backend.api.cache
+    cardinality: '*'
+    snippet: |
+      graphqlFieldFetchers.map{ it.cachePolicy }.filterNotNull()
+
+  - name: redis_cache_policies
+    reference_entity_name: redis_cache_policy
+    reference_entity_namespace: laplacian.arch.backend.api.cache
+    cardinality: '*'
+    snippet: |
+      cachePolicies.filterIsInstance<RedisCachePolicy>()
+
+  - name: data_file_fetchers
+    reference_entity_name: data_file_fetcher
+    reference_entity_namespace: laplacian.arch.backend.api.data_file
+    cardinality: '*'
+    snippet: |
+      graphqlFieldFetchers.filterIsInstance<DataFileFetcher>()
+
+  - name: data_files
+    reference_entity_name: data_file
+    reference_entity_namespace: laplacian.arch.backend.api.data_file
+    cardinality: '*'
+    snippet: |
+      dataFileFetchers.map{ it.dataFile }.distinct()
+
+  - name: rest_api_fetchers
+    reference_entity_name: rest_api_fetcher
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '*'
+    snippet: |
+      graphqlFieldFetchers.filterIsInstance<RestApiFetcher>()
+
+  - name: rest_resources
+    reference_entity_name: rest_resource
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '*'
+    snippet: |
+      restApiFetchers.map{ it.restResource }.distinct()
+
+  - name: configurations
+    reference_entity_name: service_configuration
+    reference_entity_namespace: laplacian.arch.backend.api
+    cardinality: '*'
+    snippet: |
+      ( restResources.flatMap{ it.configurations } + graphqlTypes.flatMap{ it.configurations } )
+      .map {
+          it.definition
+      }.distinct()

@@ -1,0 +1,54 @@
+{{define "class_base_name" (upper-camel search_index.name) ~}}
+{{define 'class_name' (concat class_base_name 'DocumentSearchInput') ~}}
+{{define 'index_fields' search_index.document_model.stored_properties ~}}
+package {{service.namespace}}.search.{{lower-snake search_index.name}}
+
+import {{service.namespace}}.query.*
+import {{service.namespace}}.util.*
+import java.time.*
+
+data class {{class_name}} (
+    {{#each index_fields as |property| ~}}
+    {{define 'type_and_initializer' (case
+      (eq property.type 'number') 'IntSearchInput = IntSearchInput()'
+      (eq property.type 'boolean') 'BooleanSearchInput = BooleanSearchInput()'
+      (or
+        (eq property.type 'string')
+        (eq property.type 'datetime')
+        (eq property.type 'date')
+        (eq property.type 'time')
+      ) 'StringSearchInput = StringSearchInput()'
+    ) ~}}
+    val {{lower-camel property.name}}: {{type_and_initializer}},
+    {{/each}}
+) {
+    fun isEmpty(): Boolean =
+        {{#each index_fields as |property| ~}}
+        {{lower-camel property.name}}.isEmpty(){{if (not @last) ' &&'}}
+        {{/each}}
+
+    companion object {
+        fun from(args: Map<String, Any?>): {{class_name}} {
+            return {{class_name}}(
+                {{#each index_fields as |property| ~}}
+                {{define 'prop_name' (lower-camel property.name) ~}}
+                {{#if (or
+                  (eq property.type 'string')
+                  (eq property.type 'datetime')
+                  (eq property.type 'date')
+                  (eq property.type 'time')
+                ) ~}}
+                {{prop_name}} = StringSearchInput.from(args["{{prop_name}}"]),
+                {{else if (eq prop_type 'number') ~}}
+                {{prop_name}} = IntSearchInput.from(args["{{prop_name}}"]),
+                {{else if (eq prop_type 'boolean') ~}}
+                {{prop_name}} = BooleanSearchInput.from(args["{{prop_name}}"]),
+                {{else if (eq prop_type 'date') ~}}
+                {{else}}
+                {{prop_name}} = args["{{prop_name}}"],
+                {{/if}}
+                {{/each}}
+            )
+        }
+    }
+}

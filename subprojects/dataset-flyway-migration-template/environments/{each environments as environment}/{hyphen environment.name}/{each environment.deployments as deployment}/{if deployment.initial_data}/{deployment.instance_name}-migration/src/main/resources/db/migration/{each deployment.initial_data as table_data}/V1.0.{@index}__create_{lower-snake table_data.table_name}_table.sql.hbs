@@ -1,0 +1,31 @@
+{{define 'table_model' table_data.table_model ~}}
+{{define 'column_name_escape_format' (if deployment.isa_mysql_container_deployment '`%s`' '"%s"') ~}}
+{{#*inline "CREATE_TABLE"}}
+/**
+ * The table of {{plural ENTITY.name}}.
+ */
+CREATE TABLE {{ENTITY.table_name}} (
+    {{#if ENTITY.owner ~}}
+    {{#each ENTITY.owner.primary_keys as |pk| ~}}
+    {{printf column_name_escape_format (concat (column-name ENTITY.owned_by.name) '_' (column-name pk.name))}} {{> COLUMN_TYPE PROP=pk}},
+    {{/each}}
+    {{~/if}}
+    {{#each ENTITY.stored_properties as |p| ~}}
+    {{printf column_name_escape_format (column-name p.name)}} {{> COLUMN_TYPE PROP=p}},
+    {{/each}}
+    PRIMARY KEY ({{#each ENTITY.primary_key_names as |key|}}{{key}}{{#unless @last}}, {{/unless}}{{/each}})
+);
+{{#each ENTITY.aggregates as |aggregated|}}
+{{> CREATE_TABLE ENTITY=aggregated.reference_entity}}
+{{/each}}
+{{/inline ~}}
+
+{{#*inline "COLUMN_TYPE"}}{{case
+  (eq PROP.type "string") (concat 'VARCHAR(' PROP.size ')')
+  (eq PROP.type "number") 'INTEGER'
+  (eq PROP.type "boolean") 'INTEGER'
+  (concat 'VARCHAR(' PROP.size ')')
+~}}{{if (not PROP.nullable) ' NOT NULL' ~}}
+{{/inline ~}}
+
+{{> CREATE_TABLE ENTITY=table_model}}

@@ -1,0 +1,91 @@
+entities:
+- name: rest_api_fetcher
+  namespace: laplacian.arch.backend.api.rest
+  supertype_name: graphql_field_fetcher
+  supertype_namespace: laplacian.arch.backend.api.graphql
+  subtype_key_value: rest_api
+
+  properties:
+  - name: rest_resource_name
+    type: string
+
+  - name: rest_operation_name
+    type: string
+
+  relationships:
+  - name: rest_resource
+    reference_entity_name: rest_resource
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '1'
+    mappings:
+    - from: rest_resource_name
+      to: name
+
+  - name: rest_operation
+    reference_entity_name: rest_operation
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '1'
+    snippet: |
+      restResource.operations.find{ it.name == restOperationName }!!
+
+  - name: argument_assignments
+    reference_entity_name: argument_assignment
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '*'
+    aggregate: true
+
+- name: argument_assignment
+  namespace: laplacian.arch.backend.api.rest
+
+  properties:
+  - name: key
+    type: string
+    domain_type_name: identifier
+    primary_key: true
+
+  relationships:
+  - name: value
+    reference_entity_name: argument_assignment_value
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '1'
+    aggregate: true
+
+- name: argument_assignment_value
+  namespace: laplacian.arch.backend.api.rest
+
+  properties:
+  - name: from
+    type: string
+    subtype_key: true
+
+- name: argument_assignment_value_fetcher_argument
+  namespace: laplacian.arch.backend.api.rest
+  supertype_name: argument_assignment_value
+  supertype_namespace: laplacian.arch.backend.api.rest
+  subtype_key_value: fetcher_argument
+
+  properties:
+  - name: name
+    type: string
+    domain_type_name: identifier
+
+- name: argument_assignment_value_graphql_type_config
+  namespace: laplacian.arch.backend.api.rest
+  supertype_name: argument_assignment_value
+  supertype_namespace: laplacian.arch.backend.api.rest
+  subtype_key_value: graphql_type_config
+
+  properties:
+  - name: name
+    type: string
+    domain_type_name: service_configuration_name
+
+- name: argument_assignment_value_expression
+  namespace: laplacian.arch.backend.api.rest
+  supertype_name: argument_assignment_value
+  supertype_namespace: laplacian.arch.backend.api.rest
+  subtype_key_value: expression
+
+  properties:
+  - name: expression
+    type: string

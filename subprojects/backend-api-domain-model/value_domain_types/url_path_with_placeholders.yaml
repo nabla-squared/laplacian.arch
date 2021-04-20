@@ -1,0 +1,7 @@
+value_domain_types:
+- name: url_path_with_placeholders
+  namespace: laplacian.arch.backend.api
+  type: string
+  domain:
+    pattern: |
+      (/[-$_a-zA-Z0-9]*|/\{[_$a-zA-Z][_$a-zA-Z0-9]*\})+

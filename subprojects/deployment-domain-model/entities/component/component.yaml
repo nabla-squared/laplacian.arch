@@ -1,0 +1,19 @@
+entities:
+- name: component
+  namespace: laplacian.arch.deployment.component
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: type
+    type: string
+    subtype_key: true
+
+  - name: tags
+    type: string
+    multiple: true
+    optional: true
+    default_value: |
+      emptyList<String>()

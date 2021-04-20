@@ -1,0 +1,157 @@
+entities:
+- name: springboot2_api_service_container_image
+  namespace: laplacian.arch.deployment.component.springboot2_api_service
+  supertype_name: container_image
+  supertype_namespace: laplacian.arch.deployment.component.container
+
+  properties:
+  - name: function_model_name
+    type: string
+
+  - name: custom_built
+    type: boolean
+    snippet: |
+      true
+
+  - name: container_base_image
+    type: string
+    optional: true
+    default_value: |
+      "adoptopenjdk:11-jdk-hotspot"
+
+  - name: gradle_version
+    type: string
+    optional: true
+    default_value: |
+      "6.6.1"
+
+  - name: jdk_major_version
+    type: string
+    optional: true
+    default_value: |
+      "11"
+    domain:
+      choices:
+      - value: "11"
+      - value: "14"
+      - value: "8"
+
+  - name: kotlin_version
+    type: string
+    optional: true
+    default_value: |
+      "1.4.30"
+
+  - name: kotlin_coroutine_version
+    type: string
+    optional: true
+    default_value: |
+      "1.4.2"
+
+  - name: reactor_kotlin_extension_version
+    type: string
+    optional: true
+    default_value: |
+      "1.1.2"
+
+  - name: r2dbc_postgres_driver_version
+    type: string
+    optional: true
+    default_value: |
+      "0.8.3.RELEASE"
+
+  - name: oracle_jdbc_driver_version
+    type: string
+    optional: true
+    default_value: |
+      "19.8.0.0"
+
+  - name: postgres_jdbc_driver_version
+    type: string
+    optional: true
+    default_value: |
+      "42.2.18"
+
+  - name: mysql_jdbc_driver_version
+    type: string
+    optional: true
+    default_value: |
+      "8.0.23"
+
+  - name: spring_version
+    type: string
+    optional: true
+    default_value: |
+      "5.2.7.RELEASE"
+
+  - name: reactor_version
+    type: string
+    optional: true
+    default_value: |
+      "3.2.5.RELEASE"
+
+  - name: springboot_version
+    type: string
+    optional: true
+    default_value: |
+      "2.3.1.RELEASE"
+
+  - name: springboot_graphql_webflux_version
+    type: string
+    optional: true
+    default_value: |
+      "2.0"
+
+  - name: spring_dependency_manager_version
+    type: string
+    optional: true
+    default_value: |
+      "1.0.9.RELEASE"
+
+  - name: graphql_java_version
+    type: string
+    optional: true
+    default_value: |
+      "15.0"
+
+  - name: graphql_extended_scalar_version
+    type: string
+    optional: true
+    default_value: |
+      "1.0.1"
+
+  - name: springboot_mybatis_version
+    type: string
+    optional: true
+    default_value: |
+      "2.1.4"
+
+  - name: datasource_proxy_version
+    type: string
+    optional: true
+    default_value: |
+      "1.7"
+
+  - name: repositories
+    type: string
+    multiple: true
+    optional: true
+    default_value: |
+      listOf(
+          "mavenCentral()"
+      )
+
+  relationships:
+  - name: function_model
+    reference_entity_name: service
+    reference_entity_namespace: laplacian.arch.backend.api
+    cardinality: '1'
+    mappings:
+    - from: function_model_name
+      to: name
+
+  - name: additional_libraries
+    reference_entity_name: maven_artifact
+    reference_entity_namespace: laplacian.arch.deployment.component
+    cardinality: '*'
+    aggregate: true

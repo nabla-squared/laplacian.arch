@@ -1,0 +1,531 @@
+{{define "class_base_name" (upper-camel search_index.name) ~}}
+{{define "instance_base_name" (lower-camel search_index.name) ~}}
+{{define 'index_fields' search_index.document_model.stored_properties ~}}
+            {{~#*inline 'QUERY_PREDICATE'}}
+            {{define 'predicate_type' PREDICATE.type ~}}
+            {{#if (or
+                (eq predicate_type 'match')
+                (eq predicate_type 'multi_match')
+                (eq predicate_type 'match_all')
+                (eq predicate_type 'term')
+                (eq predicate_type 'terms')
+                (eq predicate_type 'range')
+                (eq predicate_type 'query_string')
+            ) ~}}
+            {{#define 'predicate_body' ~}}
+            {{#if (eq predicate_type 'match') ~}}
+            QueryBuilders.matchQuery("{{PREDICATE.field}}", {{dquote PREDICATE.value}})
+            {{else if (eq predicate_type 'multi_match') ~}}
+            QueryBuilders.multiMatchQuery({{dquote PREDICATE.value}}, {{#each PREDICATE.fields as |field|}}{{dquote field}}{{if (not @last) ', '}}{{/each}})
+            {{else if (eq predicate_type 'match_all') ~}}
+            QueryBuilders.matchAllQuery()
+            {{else if (eq predicate_type 'term') ~}}
+            QueryBuilders.termQuery("{{PREDICATE.field}}", {{dquote PREDICATE.value}})
+            {{else if (eq predicate_type 'terms') ~}}
+            QueryBuilders.termsQuery("{{PREDICATE.field}}", *terms.toTypedArray())
+            {{else if (eq predicate_type 'range') ~}}
+            QueryBuilders
+                .rangeQuery("{{PREDICATE.field}}")
+                {{#if PREDICATE.from}}
+                .from({{dquote PREDICATE.from}}.replace("now||", "now"))
+                {{/if}}
+                {{#if PREDICATE.to}}
+                .to({{dquote PREDICATE.to}}.replace("now||", "now"))
+                {{/if}}
+                {{#if (neq PREDICATE.include_lower null)}}
+                .includeLower({{PREDICATE.include_lower}})
+                {{/if}}
+                {{#if (neq PREDICATE.include_upper null)}}
+                .includeUpper({{PREDICATE.include_upper}})
+                {{/if}}
+                {{#if PREDICATE.timezone ~}}
+                .timeZone("{{PREDICATE.timezone}}")
+                {{/if}}
+            {{else if (eq predicate_type 'query_string') ~}}
+            QueryBuilders
+                .queryStringQuery(if ({{dquote PREDICATE.query}}.isBlank()) "*:*" else {{dquote PREDICATE.query}})
+                {{#if (not-null PREDICATE.default_field) ~}}
+                .defaultField({{dquote PREDICATE.default_field}})
+                {{/if}}
+                {{#if (not-null PREDICATE.allow_leading_wildcard) ~}}
+                .allowLeadingWildcard({{PREDICATE.allow_leading_wildcard}})
+                {{/if}}
+                {{#if (not-null PREDICATE.analyze_wildcard) ~}}
+                .analyzeWildcard({{PREDICATE.analyze_wildcard}})
+                {{/if}}
+                {{#if (not-null PREDICATE.analyzer) ~}}
+                .analyzer({{dquote PREDICATE.analyzer}})
+                {{/if}}
+                {{#if (not-null PREDICATE.auto_generate_synonyms_phrase_query) ~}}
+                .autoGenerateSynonymsPhraseQuery({{PREDICATE.auto_generate_synonyms_phrase_query}})
+                {{/if}}
+                {{#if (not-null PREDICATE.boost) ~}}
+                .boost({{PREDICATE.boost}})
+                {{/if}}
+                {{#if (not-null PREDICATE.default_operator) ~}}
+                .defaultOperator({{dquote PREDICATE.default_operator}})
+                {{/if}}
+                {{#if (not-null PREDICATE.enable_position_increments) ~}}
+                .enablePositionIncrements({{PREDICATE.enable_position_increments}})
+                {{/if}}
+                {{#each PREDICATE.fields as |field| ~}}
+                .field({{dquote field}})
+                {{/each}}
+                {{#if (not-null PREDICATE.fuzziness) ~}}
+                .fuzziness(Fuzziness.{{PREDICATE.fuzziness}})
+                {{/if}}
+                {{#if (not-null PREDICATE.fuzzy_max_expansion) ~}}
+                .fuzzyMaxExpansion({{PREDICATE.fuzzy_max_expansion}})
+                {{/if}}
+                {{#if (not-null PREDICATE.fuzzy_prefix_length) ~}}
+                .fuzzyPrefixLength({{PREDICATE.fuzzy_prefix_length}})
+                {{/if}}
+                {{#if (not-null PREDICATE.fuzzy_transpositions) ~}}
+                .fuzzyTranspositions({{PREDICATE.fuzzy_transpositions}})
+                {{/if}}
+                {{#if (not-null PREDICATE.lenient) ~}}
+                .lenient({{PREDICATE.lenient}})
+                {{/if}}
+                {{#if (not-null PREDICATE.max_determinized_states) ~}}
+                .maxDeterminizedStates({{PREDICATE.max_determinized_states}})
+                {{/if}}
+                {{#if (not-null PREDICATE.minimum_should_match) ~}}
+                .minimumShouldMatch({{dquote PREDICATE.minimum_should_match}})
+                {{/if}}
+                {{#if (not-null PREDICATE.quote_analyzer) ~}}
+                .quoteAnalyzer({{PREDICATE.quote_analyzer}})
+                {{/if}}
+                {{#if (not-null PREDICATE.phrase_slop) ~}}
+                .phraseSlop({{PREDICATE.phrase_slop}})
+                {{/if}}
+                {{#if (not-null PREDICATE.quote_field_suffix) ~}}
+                .quoteFieldSuffix({{dquote PREDICATE.quote_field_suffix}})
+                {{/if}}
+                {{#if (not-null PREDICATE.rewrite) ~}}
+                .rewrite({{dquote PREDICATE.rewrite}})
+                {{/if}}
+                {{#if (not-null PREDICATE.time_zone) ~}}
+                .timeZone({{dquote PREDICATE.time_zone}})
+                {{/if}}
+            {{/if}}
+            {{/define}}
+            {{define 'is_runtime_expression' (contains PREDICATE.value '$') ~}}
+            {{#if (eq predicate_type 'terms') ~}}
+            .apply {
+                val terms: List<String> = jacksonObjectMapper().readValue({{dquote PREDICATE.value}})
+                if (terms.isNotEmpty()) {
+                    {{if CLAUSE (concat CLAUSE '(')}}{{trim predicate_body}}{{if CLAUSE ')'}}
+                }
+            }
+            {{else if is_runtime_expression ~}}
+            .apply {
+                if ({{dquote PREDICATE.value}}.isNotEmpty()) {
+                    {{if CLAUSE (concat CLAUSE '(')}}{{trim predicate_body}}{{if CLAUSE ')'}}
+                }
+            }
+            {{else ~}}
+            {{if CLAUSE (concat '.' CLAUSE '(')}}{{trim predicate_body}}{{if CLAUSE ')'}}
+            {{/if}}
+            {{/if}}
+            {{#if (eq predicate_type 'bool') ~}}
+            {{if CLAUSE (concat '.' CLAUSE '(')}}QueryBuilders.boolQuery()
+            {{#each PREDICATE.must as |predicate| ~}}
+            {{> QUERY_PREDICATE PREDICATE=predicate CLAUSE="must"}}
+            {{/each}}
+            {{#each PREDICATE.must_not as |predicate| ~}}
+            {{> QUERY_PREDICATE PREDICATE=predicate CLAUSE="mustNot"}}
+            {{/each}}
+            {{#each PREDICATE.should as |predicate| ~}}
+            {{> QUERY_PREDICATE PREDICATE=predicate CLAUSE="should"}}
+            {{/each}}
+            {{#each PREDICATE.filter as |predicate| ~}}
+            {{> QUERY_PREDICATE PREDICATE=predicate CLAUSE="filter"}}
+            {{/each}}
+            {{~ if CLAUSE ')'}}
+            {{/if}}
+            {{/inline}}
+package {{service.namespace}}.search.{{lower-snake search_index.name}}.{{lower-snake query.name}}
+
+import org.springframework.stereotype.Component
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
+import org.springframework.data.domain.PageRequest
+
+import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.search.sort.*
+import org.elasticsearch.search.aggregations.*
+import org.elasticsearch.search.aggregations.metrics.*
+import org.elasticsearch.search.aggregations.bucket.terms.Terms
+import org.elasticsearch.search.aggregations.bucket.filter.*
+import org.elasticsearch.search.aggregations.bucket.range.ParsedDateRange
+import org.elasticsearch.search.aggregations.bucket.histogram.*
+import org.elasticsearch.search.aggregations.pipeline.SimpleValue
+import org.elasticsearch.script.Script
+import org.elasticsearch.common.unit.*
+
+import com.fasterxml.jackson.module.kotlin.*
+import java.util.concurrent.CompletableFuture
+import java.time.*
+
+import {{service.namespace}}.search.{{lower-snake search_index.name}}.*
+
+{{define 'query_name' (lower-camel query.name) ~}}
+{{define 'class_base_name' (upper-camel (concat search_index.name ' ' query_name)) ~}}
+{{define 'response_data_class' (if query.aggregates
+  (concat (upper-camel (concat search_index.name ' ' query.name 'Data')))
+  (concat 'List<' (upper-camel search_index.name) 'Document>')
+) ~}}
+fun {{query_name}}Query(
+    input: {{class_base_name}}Input,
+    searcher: ReactiveElasticsearchOperations,
+): CompletableFuture<{{response_data_class}}> {
+    {{#each query.parameters as |parameter| ~}}
+    {{define 'parameter_name' (lower-camel parameter.name) ~}}
+    val {{parameter_name}} = input.{{parameter_name}}{{#if (eq parameter.class_name 'String')}} ?: ""{{/if}}
+    {{/each}}
+    val JSON = {obj:Any? -> jacksonObjectMapper().writeValueAsString(obj)}
+    val query = NativeSearchQueryBuilder()
+    {{#if (not query.aggregates) ~}}
+    {{define 'page_number' (if query.variable_page_number (concat (dquote query.page_number) '.toInt()') query.page_number) ~}}
+    {{define 'page_size' (if query.variable_page_size (concat (dquote query.page_size) '.toInt()') query.page_size) ~}}
+    .withPageable(PageRequest.of({{page_number}}, {{page_size}}))
+    {{#each query.sort as |sort| ~}}
+    {{define 'order' (if sort.variable_order
+      (printf 'if (%s == "asc") SortOrder.ASC else SortOrder.DESC' (dquote sort.order))
+      (if (eq sort.order 'asc') 'SortOrder.ASC' 'SortOrder.DESC')
+    ) ~}}
+    {{#if (eq sort.type 'score') ~}}
+    .withSort(ScoreSortBuilder().order({{order}}))
+    {{else if (eq sort.type 'field') ~}}
+    .withSort(FieldSortBuilder("{{sort.name}}").order({{order}}))
+    {{/if}}
+    {{/each}}
+    {{/if}}
+    {{#if query.predicate ~}}
+    {{> QUERY_PREDICATE PREDICATE=query.predicate CLAUSE='withQuery'}}
+    {{/if}}
+    {{#if query.aggregates ~}}
+    {{#each query.aggregates as |aggregate| ~}}
+    .addAggregation(
+        {{#*inline "AGGREGATION"}}
+        {{define 'aggregate_type' AGGREGATE.aggregation_type ~}}
+        {{define 'builder_factory_class' (case
+          (or
+            (eq aggregate_type 'bucket_script')
+            (eq aggregate_type 'bucket_selector')
+            (eq aggregate_type 'bucket_sort')
+            (eq aggregate_type 'avg_bucket')
+          ) 'PipelineAggregatorBuilders'
+          'AggregationBuilders'
+        ) ~}}
+        {{builder_factory_class}}
+        {{#if (eq aggregate_type 'filter') ~}}
+        .filter(
+            "{{AGGREGATE.name}}",
+            {{#shift width=4 }}
+            {{> QUERY_PREDICATE PREDICATE=AGGREGATE.predicate }}
+            {{/shift}}
+        )
+        {{else if (eq aggregate_type 'filters') ~}}
+        .filters(
+            "{{AGGREGATE.name}}",
+            {{#each AGGREGATE.filters as |filter| ~}}
+            FiltersAggregator.KeyedFilter(
+                "{{filter.key}}",
+                {{#shift width=8}}
+                {{> QUERY_PREDICATE PREDICATE=filter.predicate }}
+                {{/shift}}
+            )
+            {{~#unless @last ~}}
+            ,
+            {{~/unless~}}
+            {{#shift width=4 }}
+            {{> QUERY_PREDICATE PREDICATE=AGGREGATE.predicate }}
+            {{/shift}}
+            {{/each}}
+        )
+        {{else if (or
+          (eq aggregate_type 'bucket_script')
+          (eq aggregate_type 'bucket_selector')
+        ) ~}}
+        .{{lower-camel aggregate_type}}(
+            "{{AGGREGATE.name}}", mapOf(
+                {{#each AGGREGATE.buckets_path as |bucket| ~}}
+                "{{bucket.name}}" to "{{bucket.path}}",
+                {{/each}}
+            ), Script({{dquote AGGREGATE.script}})
+        )
+        {{else if (eq aggregate_type 'avg_bucket') ~}}
+        .{{lower-camel aggregate_type}}(
+            "{{AGGREGATE.name}}", 
+            {{#if AGGREGATE.buckets_path ~}}
+            "{{AGGREGATE.buckets_path}}"
+            {{/if}}
+        )
+        {{else if (eq aggregate_type 'bucket_sort') ~}}
+        {{#if AGGREGATE.sorts ~}}
+        .{{lower-camel aggregate_type}}(
+            "{{AGGREGATE.name}}", listOf(
+                {{#each AGGREGATE.sorts as |sort| ~}}
+                FieldSortBuilder({{dquote sort.field}})
+                {{#if sort.order ~}}
+                    {{~#if sort.variable_order ~}}
+                    .order(if ({{dquote sort.order}} == "asc") SortOrder.ASC else SortOrder.DESC),
+                    {{~else~}}
+                    .order(SortOrder.{{upper-snake sort.order}}),
+                    {{~/if~}}
+                {{~/if~}}
+                {{/each}}
+            )
+        )
+        {{~#if AGGREGATE.from ~}}
+        {{~define 'from' (if AGGREGATE.variable_from (concat (dquote AGGREGATE.from) '.toInt()') AGGREGATE.from) ~}}
+        .from({{from}})
+        {{~/if~}}
+        {{#if AGGREGATE.bucket_size ~}}
+        {{~define 'bucket_size' (if AGGREGATE.variable_bucket_size (concat (dquote AGGREGATE.bucket_size) '.toInt()') AGGREGATE.bucket_size) ~}}
+        .size({{bucket_size}})
+        {{~/if}}
+        {{/if}}
+        {{else if (eq aggregate_type 'date_range') ~}}
+        .dateRange("{{AGGREGATE.name}}")
+        .field("{{AGGREGATE.field}}")
+        {{#if AGGREGATE.format ~}}
+        .format("{{AGGREGATE.format}}")
+        {{/if}}
+        {{#if AGGREGATE.timezone ~}}
+        .timeZone(ZoneOffset.of("{{AGGREGATE.timezone}}"))
+        {{/if}}
+        {{#each AGGREGATE.ranges as |range| ~}}
+        {{#if (and range.from range.to) ~}}
+        {{define 'key' (if range.key range.key (concat range.from '~' range.to)) ~}}
+        .addRange("{{key}}", {{dquote range.from}}.replace("now||", "now"), {{dquote range.to}}.replace("now||", "now"))
+        {{else if range.from ~}}
+        .addUnboundedFrom({{key}}, {{dquote range.from}}.replace("now||", "now"))
+        {{else if range.to ~}}
+        .addUnboundedTo({{key}}, {{dquote range.to}}.replace("now||", "now"))
+        {{/if}}
+        {{/each}}
+        {{else if (eq aggregate_type 'date_histogram')}}
+        .dateHistogram("{{AGGREGATE.name}}")
+        .field("{{AGGREGATE.field}}")
+        {{define 'interval' AGGREGATE.interval ~}}
+        {{#if (eq interval.type 'calendar') ~}}
+        .calendarInterval(
+            {{#if interval.variable_unit ~}}
+            when ("{{interval.unit}}") {
+                "minute" -> DateHistogramInterval.MINUTE
+                "hour" -> DateHistogramInterval.HOUR
+                "day" -> DateHistogramInterval.DAY
+                "week" -> DateHistogramInterval.WEEK
+                "month" -> DateHistogramInterval.MONTH
+                "quarter" -> DateHistogramInterval.QUARTER
+                "year" -> DateHistogramInterval.YEAR
+                else -> throw IllegalArgumentException("Unknown time unit: {{interval.unit}}")
+            }
+            {{else ~}}
+            DateHistogramInterval.{{upper-snake interval.unit}}
+            {{/if}}
+        )
+        {{else if (eq interval.type 'fixed') ~}}
+        {{define 'interval_value' (trim (if interval.variable_value
+          (concat '"' interval.value '".toInt()')
+          interval.value
+        )) ~}}
+        .fixedInterval(
+            {{#if interval.variable_unit ~}}
+            when ("{{interval.unit}}") {
+                "millisecond" -> DateHistogramInterval.milliseconds({{interval_value}})
+                "second" -> DateHistogramInterval.seconds({{interval_value}})
+                "minute" -> DateHistogramInterval.minutes({{interval_value}})
+                "hour" -> DateHistogramInterval.hours({{interval_value}})
+                "day" -> DateHistogramInterval.days({{interval_value}})
+                else throw new IllegalArgumentException("Unknown time unit: {{interval.unit}}")
+            }
+            {{else ~}}
+            DateHistogramInterval.{{lower-camel (plural interval.unit)}}({{interval_value}})
+            {{/if}}
+        )
+        {{/if}}
+        {{#if AGGREGATE.format ~}}
+        .format("{{AGGREGATE.format}}")
+        {{/if}}
+        {{#if AGGREGATE.variable_min_doc_count ~}}
+        .also{ aggregate -> "{{AGGREGATE.min_doc_count}}".let{ aggregate.minDocCount(it.toInt()) }}
+        {{else if AGGREGATE.min_doc_count ~}}
+        .minDocCount({{AGGREGATE.min_doc_count}})
+        {{/if}}
+        {{define 'extended_bounds' AGGREGATE.extended_bounds ~}}
+        {{#if extended_bounds ~}}
+        .extendedBounds(
+            ExtendedBounds(
+                {{#if extended_bounds.min ~}}
+                {{dquote extended_bounds.min}}.replace("now||", "now"), 
+                {{else ~}}
+                null, 
+                {{/if}}
+                {{#if extended_bounds.max ~}}
+                {{dquote extended_bounds.max}}.replace("now||", "now")
+                {{else ~}}
+p9                null
+                {{/if}}
+            )
+        )
+        {{/if}}
+        {{#if AGGREGATE.timezone ~}}
+        .timeZone(ZoneOffset.of("{{AGGREGATE.timezone}}"))
+        {{/if}}
+        {{else if (eq aggregate_type 'terms')}}
+        .terms("{{AGGREGATE.name}}")
+        .field("{{AGGREGATE.field}}")
+        {{#if AGGREGATE.variable_max_buckets ~}}
+        .also{ aggregate -> "{{AGGREGATE.max_buckets}}".let{ aggregate.size(it.toInt()) }}
+        {{else if AGGREGATE.max_buckets ~}}
+        .size({{AGGREGATE.max_buckets}})
+        {{/if}}
+        {{#if AGGREGATE.variable_shard_size ~}}
+        .also{ aggregate -> "{{AGGREGATE.shard_size}}".let{ aggregate.shardSize(it.toInt()) }}
+        {{else if AGGREGATE.shard_size ~}}
+        .shardSize({{AGGREGATE.shard_size}})
+        {{/if}}
+        {{#if AGGREGATE.variable_order ~}}
+        .also{ aggregate -> "{{AGGREGATE.sort_by_count}}".let{ aggregate.order(BuckerOrder.count(it == "asc")) }}
+        {{else if AGGREGATE.sort_by_count ~}}
+        .order(BucketOrder.count({{if (eq AGGREGATE.sortByCount 'asc') 'true' 'false'}}))
+        {{/if}}
+        {{else ~}}
+        .{{lower-camel aggregate_type}}("{{AGGREGATE.name}}")
+        {{#if AGGREGATE.field ~}}
+        .field("{{AGGREGATE.field}}")
+        {{/if}}
+        {{/if}}
+        {{#each AGGREGATE.sub_aggregates as |sub_aggregate| ~}}
+        .subAggregation(
+            {{#shift width=4}}
+            {{> AGGREGATION AGGREGATE=sub_aggregate }}
+            {{/shift}}
+        )
+        {{/each}}
+        {{/inline}}
+        {{> AGGREGATION AGGREGATE=aggregate }}
+    )
+    {{/each}}
+    {{/if}}
+    return searcher
+    {{#if (not query.aggregates) ~}}
+    .search(query.build(),
+       {{upper-camel search_index.name}}Document::class.java,
+       IndexCoordinates.of("{{search_index.name}}"),
+    )
+    .map{ it.content }
+    .collectList()
+    .toFuture()
+    {{else ~}}
+    .aggregate(query.build(),
+        {{response_data_class}}::class.java,
+        IndexCoordinates.of("{{search_index.name}}"),
+    )
+    .reduce({{response_data_class}}()) { {{query_name}}Data, aggregate ->
+        {{query_name}}Data.apply {
+            {{#*inline 'RETRIEVE_DATA_FROM_AGGREGATE'}}
+            {{define 'aggregate_type' AGGREGATE.aggregation_type ~}}
+            {{define 'aggregate_name' AGGREGATE.name ~}}
+            {{define 'aggregate_java_type' (case
+              (eq aggregate_type 'date_range') 'ParsedDateRange'
+              (eq aggregate_type 'count') 'ValueCount'
+              (upper-camel aggregate_type)
+            ) ~}}
+            if (aggregate.name == "{{aggregate_name}}") {
+                {{#if (or
+                  (eq aggregate_type 'date_range')
+                  (eq aggregate_type 'filters')
+                ) ~}}
+                this.{{lower-camel aggregate_name}} = {{upper-camel aggregate_name}}().apply {
+                    (aggregate as {{aggregate_java_type}}).buckets.map { bucket ->
+                        val entry = Entry().apply {
+                            this.docCount = bucket.docCount
+                            bucket.aggregations.forEach { aggregate ->
+                                {{#each AGGREGATE.sub_aggregates as |sub_aggregate| ~}}
+                                {{#shift width=20}}
+                                {{> RETRIEVE_DATA_FROM_AGGREGATE AGGREGATE=sub_aggregate }}
+                                {{/shift}}
+                                {{/each}}
+                            }
+                        }
+                        when (bucket.keyAsString) {
+                            {{#if (eq aggregate_type 'date_range') ~}}
+                            {{#each AGGREGATE.ranges as |range| ~}}
+                            "{{range.key}}" -> {{lower-camel range.key}} = entry
+                            {{/each}}
+                            {{else if (eq aggregate_type 'filters') ~}}
+                            {{#each AGGREGATE.filters as |filter| ~}}
+                            "{{filter.key}}" -> {{lower-camel filter.key}} = entry
+                            {{/each}}
+                            {{/if}}
+                            else -> throw RuntimeException("Unknown key: ${bucket.keyAsString}")
+                        }
+                    }
+                }
+                {{else if (or
+                  (eq aggregate_type 'terms')
+                  (eq aggregate_type 'date_histogram')
+                ) ~}}
+                {{define 'aggregate_java_class' (case
+                  (eq aggregate_type 'date_histogram') 'Histogram'
+                  (upper-camel aggregate_type)
+                ) ~}}
+                this.{{lower-camel aggregate_name}} = (aggregate as {{aggregate_java_class}}).buckets.map { bucket ->
+                    {{upper-camel aggregate_name}}Entry().apply {
+                        this.docCount = bucket.docCount
+                        this.{{lower-camel AGGREGATE.field}} = bucket.keyAsString
+                        {{#if AGGREGATE.sub_aggregates ~}}
+                        bucket.aggregations.forEach { aggregate ->
+                            {{#each AGGREGATE.sub_aggregates as |sub_aggregate| ~}}
+                            {{#shift width=16}}
+                            {{> RETRIEVE_DATA_FROM_AGGREGATE AGGREGATE=sub_aggregate }}
+                            {{/shift}}
+                            {{/each}}
+                        }
+                        {{/if}}
+                    }
+                }
+                {{else if (eq aggregate_type 'filter') ~}}
+                {{~#if AGGREGATE.sub_aggregates ~}}
+                this.{{lower-camel aggregate_name}} = {{upper-camel aggregate_name}}().apply {
+                    this.docCount = (aggregate as Filter).docCount
+                    aggregate.aggregations.forEach{aggregate ->
+                        {{#each AGGREGATE.sub_aggregates as |sub_aggregate| ~}}
+                        {{#shift width=12}}
+                        {{> RETRIEVE_DATA_FROM_AGGREGATE AGGREGATE=sub_aggregate }}
+                        {{/shift}}
+                        {{/each}}
+                    }
+                }
+                {{~else~}}
+                this.{{lower-camel aggregate_name}} = (aggregate as Filter).docCount
+                {{~/if~}}
+                {{else if (or
+                  (eq aggregate_type 'bucket_script')
+                  (eq aggregate_type 'avg_bucket')
+                ) ~}}
+                val value = (aggregate as? SimpleValue)?.value() ?: 0.0
+                this.{{lower-camel aggregate_name}} = if ((value.isNaN() || value.isInfinite())) 0.0 else value
+                {{else if (or
+                  (eq aggregate_type 'bucket_selector')
+                  (eq aggregate_type 'bucket_sort')
+                ) ~}}
+                // NOP ({{lower-camel aggregate_name}})
+                {{else ~}}
+                val value = (aggregate as? {{upper-camel aggregate_java_type}})?.value() ?: 0.0
+                this.{{lower-camel aggregate_name}} = if ((value.isNaN() || value.isInfinite())) 0.0 else value
+                {{/if}}
+            }
+            {{/inline}}
+            {{#each query.aggregates as |aggregate| ~}}
+            {{> RETRIEVE_DATA_FROM_AGGREGATE AGGREGATE=aggregate}}
+            {{/each}}
+        }
+    }.toFuture()
+    {{/if}}
+}

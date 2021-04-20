@@ -1,0 +1,84 @@
+{{define 'heap_cache_policies' (filter service.cache_policies "(eq @it.store_type 'heap')") ~}}
+{{define 'redis_cache_policies' (filter service.cache_policies "(eq @it.store_type 'redis')") ~}}
+package {{service.namespace}}.configuration
+
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
+import org.springframework.beans.factory.annotation.Value
+{{#if service.depends_on_redis_cache ~}}
+import org.springframework.data.redis.cache.RedisCacheManager
+import org.springframework.data.redis.cache.RedisCacheConfiguration
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
+{{~/if}}
+import org.springframework.cache.caffeine.CaffeineCacheManager
+import com.github.benmanes.caffeine.cache.Caffeine
+import java.time.Duration
+import java.util.concurrent.TimeUnit
+import java.util.*
+import org.slf4j.*
+
+@Configuration
+class CacheConfig {
+    {{#each redis_cache_policies as |cache_policy| ~}}
+    {{#each cache_policy.configurations as |config| ~}}
+    @Value("{{printf '\${%s}' config.definition.key}}")
+    private lateinit var {{lower-camel config.variable_name}}: String
+    {{~/each}}
+    {{~/each}}
+
+    @Primary
+    @Bean
+    fun cacheManager(
+        {{#if redis_cache_policies ~}}
+        lettuceConnectionFactory: LettuceConnectionFactory,
+        {{~/if}}
+    ) = DelegatingCacheManager(
+        {{#if heap_cache_policies ~}}
+        mapOf<String, CaffeineCacheManager>(
+            {{#each heap_cache_policies as |cache_policy| ~}}
+            "{{cache_policy.key}}" to {{lower-camel cache_policy.name}}CacheManager(),
+            {{~/each}}
+        ),
+        {{else if ~}}
+        emptyMap<String, CaffeineCacheManager>(),
+        {{~/if}}
+        {{#if redis_cache_policies ~}}
+        redisCacheManager(lettuceConnectionFactory),
+        {{~/if}}
+    )
+
+    {{#if redis_cache_policies ~}}
+    @Bean
+    fun redisCacheManager(connectionFactory: LettuceConnectionFactory) =
+         RedisCacheManager.builder(connectionFactory)
+            .withInitialCacheConfigurations(mapOf(
+                {{#each redis_cache_policies as |cache_policy| ~}}
+                {{define 'expiration_time' cache_policy.expiration_time ~}}
+                "{{cache_policy.key}}" to RedisCacheConfiguration.defaultCacheConfig()
+                    {{#if expiration_time ~}}
+                    {{define 'amount' (if (contains expiration_time.amount '${')
+                      (printf '"%s".toLong()' expiration_time.amount)
+                      expiration_time.amount
+                    ) ~}}
+                    .entryTtl(Duration.of{{upper-camel (plural expiration_time.unit)}}({{amount}}))
+                    {{~/if}}
+                {{/each}}
+            ))
+            .disableCreateOnMissingCache()
+            .build()
+    {{~/if}}
+
+    {{#each heap_cache_policies as |cache_policy| ~}}
+    @Bean
+    fun {{lower-camel cache_policy.name}}CacheManager() = CaffeineCacheManager().also {
+        it.setCaffeine(
+            Caffeine.newBuilder()
+                {{define 'expiration_time' cache_policy.expiration_time ~}}
+                {{#if expiration_time ~}}
+                .expireAfterWrite({{expiration_time.amount}}, TimeUnit.{{upper-snake (plural expiration_time.unit)}})
+                {{~/if}}
+        )
+    }
+    {{~/each}}
+}

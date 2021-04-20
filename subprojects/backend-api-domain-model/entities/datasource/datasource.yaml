@@ -1,0 +1,32 @@
+entities:
+- name: datasource
+  namespace: laplacian.arch.backend.api.datasource
+  description: |
+    A *DataSource* represents an interface through which a client application access to a data store.
+    This includes the following models.
+    - The entity that the datastore exposes to the client
+    - Statement issued by the client to the datastore
+
+  properties:
+  - name: name
+    type: string
+    optional: true
+    primary_key: true
+    domain_type_name: identifier
+
+  - name: description
+    type: string
+    optional: true
+    default_value: |
+      name
+
+  - name: db_type
+    type: string
+    domain:
+      choices:
+      - value: postgres
+      - value: mysql
+      - value: oracle
+
+  - name: non_blocking
+    type: boolean

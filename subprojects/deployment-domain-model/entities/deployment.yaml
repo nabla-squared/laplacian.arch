@@ -1,0 +1,26 @@
+entities:
+- name: deployment
+  namespace: laplacian.arch.deployment
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: type
+    type: string
+    subtype_key: true
+
+  relationships:
+  - name: environment
+    cardinality: '1'
+    reference_entity_name: environment
+    reverse_of: deployments
+
+  - name: component
+    cardinality: '1'
+    reference_entity_name: component
+    reference_entity_namespace: laplacian.arch.deployment.component
+    mappings:
+    - from: name
+      to: name

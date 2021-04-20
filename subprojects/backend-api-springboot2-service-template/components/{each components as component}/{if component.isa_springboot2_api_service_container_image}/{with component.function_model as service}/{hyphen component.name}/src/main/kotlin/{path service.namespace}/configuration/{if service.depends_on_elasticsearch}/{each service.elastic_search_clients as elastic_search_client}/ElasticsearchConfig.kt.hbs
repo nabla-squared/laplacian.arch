@@ -1,0 +1,62 @@
+package {{service.namespace}}.configuration
+
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
+import org.springframework.data.elasticsearch.client.reactive.ReactiveRestClients
+import org.springframework.data.elasticsearch.client.ClientConfiguration
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchTemplate
+import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
+import org.springframework.data.elasticsearch.core.convert.MappingElasticsearchConverter
+import org.springframework.data.elasticsearch.core.mapping.SimpleElasticsearchMappingContext
+import org.springframework.web.reactive.function.client.ExchangeStrategies
+
+import java.time.Duration
+
+@Configuration
+class ElasticsearchConfig(
+    {{#each elastic_search_client.configurations as |config| ~}}
+    {{printf '@Value("\${%s}")' config.key}}
+    private val {{lower-camel config.name}}: String,
+    {{/each}}
+) {
+    @Bean
+    fun elasticsearchClient(): ReactiveElasticsearchClient = ReactiveRestClients.create(
+        ClientConfiguration
+        .builder()
+        {{#if elastic_search_client.endpoints ~}}
+        .connectedTo(endpoints)
+        {{~/if}}
+        {{#if elastic_search_client.path_prefix ~}}
+        .apply { if (pathPrefix.isNotEmpty()) withPathPrefix(pathPrefix) }
+        {{~/if}}
+        {{#if elastic_search_client.connect_timeout ~}}
+        .apply { if (connectTimeout.isNotEmpty()) withConnectTimeout(Duration.ofMillis(connectTimeout.toLong())) }
+        {{~/if}}
+        {{#if elastic_search_client.socket_timeout ~}}
+        .apply { if (socketTimeout.isNotEmpty()) withSocketTimeout(Duration.ofMillis(socketTimeout.toLong())) }
+        {{~/if}}
+        .withWebClientConfigurer { client ->
+            client.mutate().exchangeStrategies(
+                ExchangeStrategies
+                .builder()
+                .codecs{ it.defaultCodecs().maxInMemorySize({{if elastic_search_client.max_in_memory_size 'maxInMemorySize.let{ if (it.isEmpty()) -1 else it.toInt()}'}}) }
+                .build()
+            )
+            .build()
+        }
+        .build()
+    )
+
+    @Bean
+    fun elasticsearchConverter(): ElasticsearchConverter =
+        MappingElasticsearchConverter(SimpleElasticsearchMappingContext())
+
+    @Bean
+    fun reactiveElasticsearchOperations(
+        client: ReactiveElasticsearchClient,
+        converter: ElasticsearchConverter,
+    ): ReactiveElasticsearchOperations = ReactiveElasticsearchTemplate(client, converter)
+}

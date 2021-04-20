@@ -1,0 +1,25 @@
+entities:
+- name: filters_aggregate
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  supertype_name: elasticsearch_aggregate
+  subtype_key_value: filters
+
+  relationships:
+  - name: filters
+    reference_entity_name: keyed_filter
+    cardinality: '1..*'
+    aggregate: true
+
+- name: keyed_filter
+  namespace: laplacian.arch.backend.api.elasticsearch.aggregate
+  properties:
+  - name: key
+    type: string
+    primary_key: true
+
+  relationships:
+  - name: predicate
+    reference_entity_name: elasticsearch_query_predicate
+    reference_entity_namespace: laplacian.arch.backend.api.elasticsearch.query
+    cardinality: '1'
+    aggregate: true
