@@ -77,7 +77,8 @@ generate_backend_api_domain_model_plugin_src() {
 build_backend_api_domain_model_plugin() {
   (cd $BACKEND_API_DOMAIN_MODEL_PLUGIN_DIR
     $GRADLE build
-  )
+  ) &&
+  cp -f $BACKEND_API_DOMAIN_MODEL_PLUGIN_BUILT_MODULE $LAPLACIAN_CACHE_DIR
 }
 
 generate_deployment_domain_model_plugin_src() {

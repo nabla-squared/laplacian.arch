@@ -30,13 +30,12 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
         jvmTarget = "$kotlinJvmTarget"
     }
 }
-
 jar {
     manifest {
         attributes(
             'Plugin-Class': 'laplacian.arch.backend.api.plugin.BackendApiDomainModelPlugin',
-            'Plugin-Dependencies': '',
-            'Plugin-Id': 'laplacian-arch-backend-api-plugin',
+            'Plugin-Dependencies': 'laplacian-core.metamodel-plugin',
+            'Plugin-Id': 'laplacian-arch.backend-api-domain-model-plugin',
             'Plugin-Version': '1.0.0',
         )
     }

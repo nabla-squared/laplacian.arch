@@ -1,7 +1,11 @@
-{{define 'deployment_components' (unique (map environment.deployments '@it.component')) ~}}
-{{define 'deployments_with_migration' (unique (filter environment.deployments '@it.initial_data')) ~}}
+#!/usr/bin/env bash
+set -e
+PROJECT_BASE_DIR=$(cd $"${BASH_SOURCE%/*}/../" && pwd)
+SCRIPT_BASE_DIR="$PROJECT_BASE_DIR/scripts"
 DEPLOYMENT_BASE_DIR=$PROJECT_BASE_DIR/environments/{{hyphen environment.name}}
 COMPONENT_BASE_DIR=$PROJECT_BASE_DIR/components
+{{define 'deployment_components' (unique (map environment.deployments '@it.component')) ~}}
+{{define 'deployments_with_migration' (unique (filter environment.deployments '@it.initial_data')) ~}}
 
 main () {
   build_components
@@ -37,7 +41,7 @@ deploy_containers() {
   )
 }
 
-#+@additional-declarations@
+#@+additional-declarations@
 #@additional-declarations@
 
 main
