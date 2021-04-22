@@ -10,6 +10,7 @@ SUBPROJECTS_DIR="$PROJECT_BASE_DIR/subprojects"
 DIST_DIR="$PROJECT_BASE_DIR/dist"
 LAPLACIAN_HOME="$HOME/.laplacian"
 LAPLACIAN_CACHE_DIR="$LAPLACIAN_HOME/cache"
+LOCAL_TEMPLATE_DIR="$PROJECT_BASE_DIR/template"
 MODEL_SCHEMA_DIR="$PROJECT_BASE_DIR/schema"
 MODEL_SCHEMA_FILE="$MODEL_SCHEMA_DIR/model-schema.json"
 
@@ -47,6 +48,7 @@ METAMODEL_MODEL_URL="https://github.com/nabla-squared/laplacian.core/releases/do
 METAMODEL_PLUGIN_URL="https://github.com/nabla-squared/laplacian.core/releases/download/v1.0.0/laplacian-core.metamodel-plugin-1.0.0.jar"
 DOMAIN_MODEL_PLUGIN_TEMPLATE_URL="https://github.com/nabla-squared/laplacian.core/releases/download/v1.0.0/laplacian-core.domain-model-plugin-template-1.0.0.zip"
 DOMAIN_MODEL_JSON_SCHEMA_TEMPLATE_URL="https://github.com/nabla-squared/laplacian.core/releases/download/v1.0.0/laplacian-core.domain-model-json-schema-template-1.0.0.zip"
+DOMAIN_MODEL_DOCUMENT_TEMPLATE_URL="https://github.com/nabla-squared/laplacian.core/releases/download/v1.0.0/laplacian-core.domain-model-document-template-1.0.0.zip"
 
 GRADLE="./gradlew"
 ZIP="jar -cfM"
@@ -58,6 +60,7 @@ main() {
   build_backend_api_domain_model_plugin || die
   generate_deployment_domain_model_plugin_src || die
   build_deployment_domain_model_plugin || die
+  generate_document || die
   update_distribution || die
   update_local_modules || die
 }
@@ -114,6 +117,16 @@ build_deployment_domain_model_plugin() {
   (cd $DEPLOYMENT_DOMAIN_MODEL_PLUGIN_DIR
     $GRADLE build
   )
+}
+
+generate_document() {
+  laplacian generate \
+    --template $DOMAIN_MODEL_DOCUMENT_TEMPLATE_URL \
+    --template $LOCAL_TEMPLATE_DIR \
+    --model $METAMODEL_MODEL_URL \
+    --model $BACKEND_API_DOMAIN_MODEL_DIR \
+    --plugin $METAMODEL_PLUGIN_URL \
+    --destination $PROJECT_BASE_DIR
 }
 
 update_distribution() {
