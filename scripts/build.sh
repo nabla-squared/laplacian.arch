@@ -10,6 +10,8 @@ SUBPROJECTS_DIR="$PROJECT_BASE_DIR/subprojects"
 DIST_DIR="$PROJECT_BASE_DIR/dist"
 LAPLACIAN_HOME="$HOME/.laplacian"
 LAPLACIAN_CACHE_DIR="$LAPLACIAN_HOME/cache"
+MODEL_SCHEMA_DIR="$PROJECT_BASE_DIR/schema"
+MODEL_SCHEMA_FILE="$MODEL_SCHEMA_DIR/model-schema.json"
 
 BACKEND_API_DOMAIN_MODEL_MODULE_NAME='backend-api-domain-model'
 BACKEND_API_DOMAIN_MODEL_DIR="$SUBPROJECTS_DIR/$BACKEND_API_DOMAIN_MODEL_MODULE_NAME"
@@ -44,12 +46,14 @@ DATASET_FLYWAY_MIGRATION_TEMPLATE_MODULE_PATH="$DIST_DIR/$GROUP.$DATASET_FLYWAY_
 METAMODEL_MODEL_URL="https://github.com/nabla-squared/laplacian.core/releases/download/v1.0.0/laplacian-core.metamodel-model-1.0.0.zip"
 METAMODEL_PLUGIN_URL="https://github.com/nabla-squared/laplacian.core/releases/download/v1.0.0/laplacian-core.metamodel-plugin-1.0.0.jar"
 DOMAIN_MODEL_PLUGIN_TEMPLATE_URL="https://github.com/nabla-squared/laplacian.core/releases/download/v1.0.0/laplacian-core.domain-model-plugin-template-1.0.0.zip"
+DOMAIN_MODEL_JSON_SCHEMA_TEMPLATE_URL="https://github.com/nabla-squared/laplacian.core/releases/download/v1.0.0/laplacian-core.domain-model-json-schema-template-1.0.0.zip"
 
 GRADLE="./gradlew"
 ZIP="jar -cfM"
 
 main() {
   # set -x
+  generate_json_schema || die
   generate_backend_api_domain_model_plugin_src || die
   build_backend_api_domain_model_plugin || die
   generate_deployment_domain_model_plugin_src || die
@@ -63,6 +67,17 @@ die() {
   exit 1
 }
 
+generate_json_schema() {
+  rm -rf $MODEL_SCHEMA_DIR && \
+  laplacian generate \
+    --template $DOMAIN_MODEL_JSON_SCHEMA_TEMPLATE_URL \
+    --model $BACKEND_API_DOMAIN_MODEL_DIR \
+    --model $DEPLOYMENT_DOMAIN_MODEL_DIR \
+    --model $METAMODEL_MODEL_URL \
+    --plugin $METAMODEL_PLUGIN_URL \
+    --destination $MODEL_SCHEMA_DIR
+}
+
 generate_backend_api_domain_model_plugin_src() {
   rm -rf $BACKEND_API_DOMAIN_MODEL_PLUGIN_DIR && \
   mkdir -p $BACKEND_API_DOMAIN_MODEL_PLUGIN_DIR && \
@@ -70,14 +85,14 @@ generate_backend_api_domain_model_plugin_src() {
     --template $DOMAIN_MODEL_PLUGIN_TEMPLATE_URL \
     --model $BACKEND_API_DOMAIN_MODEL_DIR \
     --model $METAMODEL_MODEL_URL \
+    --schema $MODEL_SCHEMA_FILE \
     --plugin $METAMODEL_PLUGIN_URL \
     --destination $BACKEND_API_DOMAIN_MODEL_PLUGIN_DIR
 }
 
 build_backend_api_domain_model_plugin() {
   (cd $BACKEND_API_DOMAIN_MODEL_PLUGIN_DIR
-    $GRADLE build
-  ) &&
+    $GRADLE build) && \
   cp -f $BACKEND_API_DOMAIN_MODEL_PLUGIN_BUILT_MODULE $LAPLACIAN_CACHE_DIR
 }
 
@@ -89,6 +104,7 @@ generate_deployment_domain_model_plugin_src() {
     --model $DEPLOYMENT_DOMAIN_MODEL_DIR \
     --model $METAMODEL_MODEL_URL \
     --model $BACKEND_API_DOMAIN_MODEL_DIR \
+    --schema $MODEL_SCHEMA_FILE \
     --plugin $METAMODEL_PLUGIN_URL \
     --plugin $BACKEND_API_DOMAIN_MODEL_PLUGIN_BUILT_MODULE \
     --destination $DEPLOYMENT_DOMAIN_MODEL_PLUGIN_DIR
@@ -105,21 +121,16 @@ update_distribution() {
   mkdir -p $DIST_DIR && \
   cp -f $BACKEND_API_DOMAIN_MODEL_PLUGIN_BUILT_MODULE $BACKEND_API_DOMAIN_MODEL_PLUGIN_PATH && \
   (cd $BACKEND_API_DOMAIN_MODEL_DIR
-    $ZIP $BACKEND_API_DOMAIN_MODEL_MODULE_PATH .
-  ) && \
+    $ZIP $BACKEND_API_DOMAIN_MODEL_MODULE_PATH . ) && \
   cp -f $DEPLOYMENT_DOMAIN_MODEL_PLUGIN_BUILT_MODULE $DEPLOYMENT_DOMAIN_MODEL_PLUGIN_PATH && \
   (cd $DEPLOYMENT_DOMAIN_MODEL_DIR
-    $ZIP $DEPLOYMENT_DOMAIN_MODEL_MODULE_PATH .
-  ) && \
+    $ZIP $DEPLOYMENT_DOMAIN_MODEL_MODULE_PATH . ) && \
   (cd $BACKEND_API_SPRINGBOOT2_SERVICE_TEMPLATE_DIR
-    $ZIP $BACKEND_API_SPRINGBOOT2_SERVICE_TEMPLATE_MODULE_PATH .
-  ) && \
+    $ZIP $BACKEND_API_SPRINGBOOT2_SERVICE_TEMPLATE_MODULE_PATH . ) && \
   (cd $BACKEND_API_PROJECT_TEMPLATE_DIR
-    $ZIP $BACKEND_API_PROJECT_TEMPLATE_MODULE_PATH .
-  ) && \
+    $ZIP $BACKEND_API_PROJECT_TEMPLATE_MODULE_PATH . ) && \
   (cd $DATASET_FLYWAY_MIGRATION_TEMPLATE_DIR
-    $ZIP $DATASET_FLYWAY_MIGRATION_TEMPLATE_MODULE_PATH .
-  )
+    $ZIP $DATASET_FLYWAY_MIGRATION_TEMPLATE_MODULE_PATH . )
 }
 
 update_local_modules() {

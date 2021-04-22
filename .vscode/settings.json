@@ -1,0 +1,10 @@
+{
+  "yaml.schemas": {
+    "./schema/model-schema.json": [
+      "subprojects/backend-api-domain-model/**/*.yaml",
+      "subprojects/backend-api-domain-model/*.yaml",
+      "subprojects/deployment-domain-model/**/*.yaml",
+      "subprojects/deployment-domain-model/*.yaml"
+    ]
+  }
+}

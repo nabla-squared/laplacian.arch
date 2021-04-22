@@ -1,0 +1,26 @@
+{{define "main_class" (concat
+  service.namespace '.' (upper-camel service.name) 'ApplicationKt'
+) ~}}
+{
+ "version": "0.2.0",
+  "configurations": [
+		{
+			"type": "kotlin",
+			"request": "launch",
+      "name": "Debug Kotlin",
+    	"projectRoot": "${workspaceFolder}",
+      "mainClass": "{{main_class}}",
+      "logLevel": "INFO"
+		},
+    {
+      "type": "kotlin",
+      "name": "Debug (Attach)",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5060,
+      "projectRoot": "${workspaceFolder}",
+      "timeout": 30000,
+      "logLevel": "INFO"
+    }
+  ]
+}
