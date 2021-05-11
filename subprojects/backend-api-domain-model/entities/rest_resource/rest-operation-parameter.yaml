@@ -1,0 +1,49 @@
+entities:
+- name: rest_operation_parameter
+  namespace: laplacian.arch.backend.api.rest
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+    domain_type_name: identifier
+
+  - name: description
+    type: string
+    optional: true
+    default_value: |
+      "$name"
+
+  - name: required
+    type: boolean
+    optional: true
+    default_value: |
+      false
+
+  - name: type
+    type: string
+    domain:
+      choices:
+      - value: string
+      - value: number
+      - value: float
+      - value: boolean
+      - value: object
+
+  - name: multiple
+    type: boolean
+    optional: true
+    default_value: |
+      false
+
+  - name: type_in_java
+    type: string
+    snippet: |
+      when (type) {
+        "string" -> "String"
+        "number" -> "Integer"
+        "float" -> "Double"
+        "boolean" -> "boolean"
+        "object" -> "Map<String, Object>"
+        else -> throw IllegalArgumentException("Can not handle type: $type")
+      }

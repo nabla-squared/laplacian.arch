@@ -41,3 +41,10 @@ entities:
     reference_entity_namespace: laplacian.arch.deployment.datasource
     cardinality: '*'
     aggregate: true
+
+  - name: elasticsearch_clients
+    reference_entity_name: elasticsearch_client_configuration
+    reference_entity_namespace: laplacian.arch.deployment.component.elasticsearch
+    cardinality: '*'
+    aggregate: true
+

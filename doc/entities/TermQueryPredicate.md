@@ -12,12 +12,21 @@ An entity describing a term_query_predicate.
 ## Properties
 
 ### field: `String`
-The field of this term_query_predicate.
+Field you wish to search.
+
 
 ### value: `String`
-The value of this term_query_predicate.
+Term you wish to find in the provided <field>. To return a document,
+the term must exactly match the field value, including whitespace and capitalization.
 
-### boost: `Int`
-The boost of this term_query_predicate.
+
+### boost: `Double`
+Floating point number used to decrease or increase the relevance scores of a query.
+
+
+### case_insensitive: `Boolean`
+Allows ASCII case insensitive matching of the value with the indexed field values when set to true.
+Default is false which means the case sensitivity of matching depends on the underlying field’s mapping.
+
 
 ## Relationships

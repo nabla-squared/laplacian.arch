@@ -79,6 +79,27 @@ open class DbContainerDeploymentRecord (
     override val jdbcConnectionString: String
         get() = getOrThrow("jdbcConnectionString")
     /**
+     * Defines this db_container_deployment is enable_db_migration or not.
+     */
+    override val enableDbMigration: Boolean
+        get() = getOrThrow("enableDbMigration") {
+            initialData.isNotEmpty()
+        }
+    /**
+     * Defines this db_container_deployment is generates_ddl_migration or not.
+     */
+    override val generatesDdlMigration: Boolean
+        get() = getOrThrow("generatesDdlMigration") {
+            enableDbMigration
+        }
+    /**
+     * The generated_migration_base_version of this db_container_deployment.
+     */
+    override val generatedMigrationBaseVersion: String
+        get() = getOrThrow("generatedMigrationBaseVersion") {
+            "1.0"
+        }
+    /**
      * The initial_data of this db_container_deployment.
      */
     override val initialData: List<InitialTableData> by lazy {

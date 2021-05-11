@@ -6,15 +6,12 @@ entities:
     type: string
     primary_key: true
 
-  - name: version
-    type: string
-
   - name: namespace
     type: string
     domain_type_name: namespace
-    optional: true
-    default_value: |
-      "${_context.get("project.namespace")}.service.${name.lowerUnderscorize()}"
+
+  - name: version
+    type: string
 
   - name: description
     type: string
@@ -31,7 +28,7 @@ entities:
   - name: depends_on_elasticsearch
     type: boolean
     snippet: |
-      elasticsearchIndexes.isNotEmpty()
+      elasticsearchIndexes.isNotEmpty() || aggregates.any{ it.dependsOnElasticsearch }
 
   - name: depends_on_cache
     type: boolean
@@ -51,7 +48,7 @@ entities:
   - name: depends_on_mybatis
     type: boolean
     snippet: |
-      graphqlTypes.any{ it.dependsOnMybatis }
+      graphqlTypes.any{ it.dependsOnMybatis } || aggregates.any{ it.dependsOnMybatis }
 
   - name: depends_on_blocking_postgres_datasource
     type: boolean
@@ -78,11 +75,41 @@ entities:
     multiple: true
     optional: true
 
+
   relationships:
+
+  ## Entity aggregates
+  - name: aggregate_entries
+    reference_entity_name: aggregate_entry
+    reference_entity_namespace: laplacian.arch.backend.api.aggregate
+    cardinality: '*'
+    aggregate: true
+
+  - name: aggregates
+    reference_entity_name: aggregate
+    reference_entity_namespace: laplacian.arch.backend.api.aggregate
+    cardinality: '*'
+    snippet: |
+      aggregateEntries.map{ it.aggregate }
+
+  ## REST resources
+  - name: rest_resource_entries
+    reference_entity_name: rest_resource_entry
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '*'
+    aggregate: true
+
+  - name: rest_resources
+    reference_entity_name: rest_resource
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '*'
+    snippet: |
+      restResourceEntries.map{ it.restResource }
+
+  ## Datasource (RDBMS client settings)
   - name: datasource_entries
     cardinality: '*'
     reference_entity_name: datasource_entry
-    reference_entity_namespace: laplacian.arch.backend.api.datasource
     aggregate: true
 
   - name: datasources
@@ -91,6 +118,13 @@ entities:
     reference_entity_namespace: laplacian.arch.backend.api.datasource
     snippet: |
       datasourceEntries.map{ it.datasource }.distinct()
+
+  - name: primary_datasource
+    cardinality: '0..1'
+    reference_entity_name: datasource
+    reference_entity_namespace: laplacian.arch.backend.api.datasource
+    snippet: |
+      datasourceEntries.find{ it.primary }?.datasource
 
   - name: blocking_datasources
     cardinality: '*'
@@ -106,6 +140,21 @@ entities:
     snippet: |
       datasources.filter{ it.nonBlocking }
 
+  ## Elasticsearch client settings
+  - name: elasticsearch_clients
+    cardinality: '*'
+    reference_entity_name: elasticsearch_client
+    reference_entity_namespace: laplacian.arch.backend.api.elasticsearch
+    aggregate: true
+
+  - name: primary_elasticsearch_client
+    cardinality: '0..1'
+    reference_entity_name: elasticsearch_client
+    reference_entity_namespace: laplacian.arch.backend.api.elasticsearch
+    snippet: |
+      elasticsearchClients.find{ it.primary }
+
+  ## Graphql types
   - name: graphql_type_entries
     cardinality: '*'
     reference_entity_name: graphql_type_entry
@@ -182,13 +231,6 @@ entities:
     snippet: |
       graphqlFieldFetchers.filterIsInstance<RestApiFetcher>()
 
-  - name: rest_resources
-    reference_entity_name: rest_resource
-    reference_entity_namespace: laplacian.arch.backend.api.rest
-    cardinality: '*'
-    snippet: |
-      restApiFetchers.map{ it.restResource }.distinct()
-
   - name: configurations
     reference_entity_name: service_configuration
     reference_entity_namespace: laplacian.arch.backend.api
@@ -198,3 +240,4 @@ entities:
       .map {
           it.definition
       }.distinct()
+

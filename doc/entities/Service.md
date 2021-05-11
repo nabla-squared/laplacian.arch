@@ -15,15 +15,11 @@ An entity describing a service.
 The name of this service.
 - **Attributes:** *PK*
 
-### version: `String`
-The version of this service.
-
 ### namespace: `String`
 The namespace of this service.
-- **Default Value:**
-  ```kotlin
-  "${_context.get("project.namespace")}.service.${name.lowerUnderscorize()}"
-  ```
+
+### version: `String`
+The version of this service.
 
 ### description: `String`
 The description of this service.
@@ -43,7 +39,7 @@ The graphql_type_groups of this service.
 Defines this service is depends_on_elasticsearch or not.
 - **Code:**
   ```kotlin
-  elasticsearchIndexes.isNotEmpty()
+  elasticsearchIndexes.isNotEmpty() || aggregates.any{ it.dependsOnElasticsearch }
   ```
 
 ### depends_on_cache: `Boolean`
@@ -71,7 +67,7 @@ Defines this service is depends_on_redis_cache or not.
 Defines this service is depends_on_mybatis or not.
 - **Code:**
   ```kotlin
-  graphqlTypes.any{ it.dependsOnMybatis }
+  graphqlTypes.any{ it.dependsOnMybatis } || aggregates.any{ it.dependsOnMybatis }
   ```
 
 ### depends_on_blocking_postgres_datasource: `Boolean`
@@ -107,6 +103,30 @@ The instrumentations of this service.
 
 ## Relationships
 
+### aggregate_entries: `List<AggregateEntry>`
+The aggregate_entries of this service.
+- **Cardinality:** `*`
+
+### aggregates: `List<Aggregate>`
+The aggregates of this service.
+- **Cardinality:** `*`
+- **Code:**
+  ```kotlin
+  aggregateEntries.map{ it.aggregate }
+  ```
+
+### rest_resource_entries: `List<RestResourceEntry>`
+The rest_resource_entries of this service.
+- **Cardinality:** `*`
+
+### rest_resources: `List<RestResource>`
+The rest_resources of this service.
+- **Cardinality:** `*`
+- **Code:**
+  ```kotlin
+  restResourceEntries.map{ it.restResource }
+  ```
+
 ### datasource_entries: `List<DatasourceEntry>`
 The datasource_entries of this service.
 - **Cardinality:** `*`
@@ -117,6 +137,14 @@ The datasources of this service.
 - **Code:**
   ```kotlin
   datasourceEntries.map{ it.datasource }.distinct()
+  ```
+
+### primary_datasource: `Datasource?`
+The primary_datasource of this service.
+- **Cardinality:** `0..1`
+- **Code:**
+  ```kotlin
+  datasourceEntries.find{ it.primary }?.datasource
   ```
 
 ### blocking_datasources: `List<Datasource>`
@@ -133,6 +161,18 @@ The non_blocking_datasources of this service.
 - **Code:**
   ```kotlin
   datasources.filter{ it.nonBlocking }
+  ```
+
+### elasticsearch_clients: `List<ElasticsearchClient>`
+The elasticsearch_clients of this service.
+- **Cardinality:** `*`
+
+### primary_elasticsearch_client: `ElasticsearchClient?`
+The primary_elasticsearch_client of this service.
+- **Cardinality:** `0..1`
+- **Code:**
+  ```kotlin
+  elasticsearchClients.find{ it.primary }
   ```
 
 ### graphql_type_entries: `List<GraphqlTypeEntry>`
@@ -218,14 +258,6 @@ The rest_api_fetchers of this service.
 - **Code:**
   ```kotlin
   graphqlFieldFetchers.filterIsInstance<RestApiFetcher>()
-  ```
-
-### rest_resources: `List<RestResource>`
-The rest_resources of this service.
-- **Cardinality:** `*`
-- **Code:**
-  ```kotlin
-  restApiFetchers.map{ it.restResource }.distinct()
   ```
 
 ### configurations: `List<ServiceConfiguration>`

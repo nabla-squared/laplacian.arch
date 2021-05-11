@@ -16,10 +16,10 @@ data class ElasticsearchContainerImageRecord (
 ): ContainerImageRecord(__record, _context), ElasticsearchContainerImage {
 
     /**
-     * The container_image of this elasticsearch_container_image.
+     * The base_name of this elasticsearch_container_image.
      */
-    override val containerImage: String
-        get() = getOrThrow("containerImage") {
+    override val baseName: String
+        get() = getOrThrow("baseName") {
             "elasticsearch"
         }
     /**

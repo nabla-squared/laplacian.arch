@@ -50,7 +50,7 @@ interface JdbcDatasourceConfiguration : DatasourceConfiguration {
      */
     val idleTimeout: Int?
     /**
-     * The max-lifetime of this jdbc_datasource_configuration.
+     * The max_lifetime of this jdbc_datasource_configuration.
      */
     val maxLifetime: Int?
     /**

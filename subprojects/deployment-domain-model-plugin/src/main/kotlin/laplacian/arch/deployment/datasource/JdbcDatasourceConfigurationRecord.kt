@@ -71,7 +71,7 @@ open class JdbcDatasourceConfigurationRecord (
     override val idleTimeout: Int?
         by _record
     /**
-     * The max-lifetime of this jdbc_datasource_configuration.
+     * The max_lifetime of this jdbc_datasource_configuration.
      */
     override val maxLifetime: Int?
         by _record

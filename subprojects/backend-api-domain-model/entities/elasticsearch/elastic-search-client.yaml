@@ -1,0 +1,16 @@
+entities:
+- name: elasticsearch_client
+  namespace: laplacian.arch.backend.api.elasticsearch
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+    domain_type_name: identifier
+
+  - name: primary
+    type: boolean
+    optional: true
+    default_value: |
+      false
+

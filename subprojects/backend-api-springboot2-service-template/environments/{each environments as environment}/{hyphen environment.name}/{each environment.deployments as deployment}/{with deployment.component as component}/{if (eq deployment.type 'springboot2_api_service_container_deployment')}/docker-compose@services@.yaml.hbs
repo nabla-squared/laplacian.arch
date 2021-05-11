@@ -45,6 +45,10 @@
     {{printf "- '%s=%s'" (upper-snake (concat prefix 'password')) datasource.password}}
     {{printf "- '%s=%s'" (upper-snake (concat prefix 'jdbc-url')) datasource.jdbc_connection_string}}
     {{/each}}
+    {{#each deployment.elasticsearch_clients as |client| ~}}
+    {{define 'prefix' (concat 'elasticsearch.' (hyphen client.name) '.') ~}}
+    {{printf "- '%s=%s'" (upper-snake (concat prefix 'endpoints')) (concat client.endpoints separator=",")}}
+    {{/each}}
     {{#if service.depends_on_redis_cache ~}}
     {{define 'redis_server_deployment' (first (filter environment.deployments "(eq @it.component.type 'redis_server')")) ~}}
     - 'REDIS_HOST={{redis_server_deployment.component.instance_name}}'

@@ -14,7 +14,7 @@ data class ElasticsearchQueryFieldSortRecord (
 ): ElasticsearchQuerySortRecord(__record, _context), ElasticsearchQueryFieldSort {
 
     /**
-     * The name of this elasticsearch_query_field_sort.
+     * Name of sorting field.
      */
     override val name: String
         get() = getOrThrow("name")

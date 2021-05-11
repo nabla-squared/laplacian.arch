@@ -90,7 +90,10 @@ generate_backend_api_domain_model_plugin_src() {
     --model $METAMODEL_MODEL_URL \
     --schema $MODEL_SCHEMA_FILE \
     --plugin $METAMODEL_PLUGIN_URL \
-    --destination $BACKEND_API_DOMAIN_MODEL_PLUGIN_DIR
+    --destination $BACKEND_API_DOMAIN_MODEL_PLUGIN_DIR \
+    --clean \
+    --retain "build/"
+
 }
 
 build_backend_api_domain_model_plugin() {
@@ -110,7 +113,9 @@ generate_deployment_domain_model_plugin_src() {
     --schema $MODEL_SCHEMA_FILE \
     --plugin $METAMODEL_PLUGIN_URL \
     --plugin $BACKEND_API_DOMAIN_MODEL_PLUGIN_BUILT_MODULE \
-    --destination $DEPLOYMENT_DOMAIN_MODEL_PLUGIN_DIR
+    --destination $DEPLOYMENT_DOMAIN_MODEL_PLUGIN_DIR \
+    --clean \
+    --retain "build/"
 }
 
 build_deployment_domain_model_plugin() {

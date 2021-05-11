@@ -26,7 +26,35 @@ dependencies {
   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$kotlinCoroutineVersion"
   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlinCoroutineVersion"
   implementation "com.graphql-java:graphql-java:$graphqlJavaVersion"
-
+  {{#if service.depends_on_mybatis ~}}
+  implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:$springbootMybatisVersion"
+  {{/if}}
+  {{#if service.blocking_datasources ~}}
+  implementation "net.ttddyy:datasource-proxy:$datasourceProxyVersion"
+  {{/if}}
+  {{#if service.depends_on_cache ~}}
+  implementation 'org.springframework.boot:spring-boot-starter-cache'
+  implementation 'com.github.ben-manes.caffeine:caffeine'
+  {{/if}}
+  {{#if service.depends_on_redis_cache ~}}
+  implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+  {{/if}}
+  {{#if service.depends_on_elasticsearch ~}}
+  implementation "org.elasticsearch:elasticsearch:$elasticsearchVersion"
+  implementation "org.elasticsearch.client:elasticsearch-rest-high-level-client:$elasticsearchVersion"
+  {{/if}}
+  {{#if service.depends_on_blocking_oracle_datasource ~}}
+  runtimeOnly "com.oracle.database.jdbc:ojdbc10:$oracleJdbcDriverVersion"
+  {{~/if}}
+  {{#if service.depends_on_blocking_postgres_datasource ~}}
+  runtimeOnly "org.postgresql:postgresql:$postgresJdbcDriverVersion"
+  {{~/if}}
+  {{#if service.depends_on_blocking_mysql_datasource ~}}
+  runtimeOnly "mysql:mysql-connector-java:$mysqlJdbcDriverVersion"
+  {{~/if}}
+  {{#each component.additional_libraries as |library| ~}}
+  implementation "{{library.group}}:{{library.name}}:${{lower-camel library.name}}Version"
+  {{/each}}
   testImplementation 'org.jetbrains.kotlin:kotlin-test'
   testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
 }

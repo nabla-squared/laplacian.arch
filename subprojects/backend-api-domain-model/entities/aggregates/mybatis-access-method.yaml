@@ -1,0 +1,25 @@
+entities:
+- name: mybatis_access_method
+  namespace: laplacian.arch.backend.api.aggregate
+  supertype_name: aggregate_access_method
+  supertype_namespace: laplacian.arch.backend.api.aggregate
+  subtype_key_value: mybatis
+
+  properties:
+  - name: datasource_name
+    type: string
+    optional: true
+    domain_type_name: identifier
+
+  - name: statement_type
+    type: string
+    domain:
+      choices:
+      - value: select
+      - value: insert
+      - value: update
+      - value: delete
+      - value: sql
+
+  - name: statement
+    type: string

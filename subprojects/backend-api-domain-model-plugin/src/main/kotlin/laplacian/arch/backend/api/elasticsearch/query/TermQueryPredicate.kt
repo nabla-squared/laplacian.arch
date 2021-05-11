@@ -9,17 +9,27 @@ import laplacian.util.*
  */
 interface TermQueryPredicate : ElasticsearchQueryPredicate {
     /**
-     * The field of this term_query_predicate.
+     * Field you wish to search.
+
      */
     val field: String
     /**
-     * The value of this term_query_predicate.
+     * Term you wish to find in the provided <field>. To return a document,
+the term must exactly match the field value, including whitespace and capitalization.
+
      */
     val value: String
     /**
-     * The boost of this term_query_predicate.
+     * Floating point number used to decrease or increase the relevance scores of a query.
+
      */
-    val boost: Int
+    val boost: Double?
+    /**
+     * Allows ASCII case insensitive matching of the value with the indexed field values when set to true.
+Default is false which means the case sensitivity of matching depends on the underlying field’s mapping.
+
+     */
+    val caseInsensitive: Boolean?
     /**
      * Returns wether this instance is a term_query_predicate or not.
      */

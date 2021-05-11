@@ -24,6 +24,16 @@ An entity describing a value_domain.
 An entity describing a value_domain_type.
 - [**ValueItem**](<./doc/entities/ValueItem.md>)
 An entity describing a value_item.
+- [**AggregateAccessMethod**](<./doc/entities/AggregateAccessMethod.md>)
+An entity describing a aggregate_access_method.
+- [**AggregateEntry**](<./doc/entities/AggregateEntry.md>)
+An entity describing a aggregate_entry.
+- [**Aggregate**](<./doc/entities/Aggregate.md>)
+An entity describing a aggregate.
+- [**ElasticsearchAccessMethod**](<./doc/entities/ElasticsearchAccessMethod.md>)
+An entity describing a elasticsearch_access_method.
+- [**MybatisAccessMethod**](<./doc/entities/MybatisAccessMethod.md>)
+An entity describing a mybatis_access_method.
 - [**ApiCallArgument**](<./doc/entities/ApiCallArgument.md>)
 An entity describing a api_call_argument.
 - [**CachePolicy**](<./doc/entities/CachePolicy.md>)
@@ -43,8 +53,6 @@ This includes the following models.
 - The entity that the datastore exposes to the client
 - Statement issued by the client to the datastore
 
-- [**DatasourceEntry**](<./doc/entities/DatasourceEntry.md>)
-An entity describing a datasource_entry.
 - [**Duration**](<./doc/entities/Duration.md>)
 An entity describing a duration.
 - [**AvgBucketAggregate**](<./doc/entities/AvgBucketAggregate.md>)
@@ -93,12 +101,16 @@ An entity describing a value_count_aggregate.
 A multi-bucket value source based aggregation where buckets are dynamically built
 - one per unique value.
 
+- [**ElasticsearchClient**](<./doc/entities/ElasticsearchClient.md>)
+An entity describing a elasticsearch_client.
 - [**ElasticsearchAggregate**](<./doc/entities/ElasticsearchAggregate.md>)
 An entity describing a elasticsearch_aggregate.
 - [**ElasticsearchIndex**](<./doc/entities/ElasticsearchIndex.md>)
 An entity describing a elasticsearch_index.
 - [**ElasticsearchIndexSort**](<./doc/entities/ElasticsearchIndexSort.md>)
 An entity describing a elasticsearch_index_sort.
+- [**ElasticsearchQueryCollapse**](<./doc/entities/ElasticsearchQueryCollapse.md>)
+An entity describing a elasticsearch_query_collapse.
 - [**ElasticsearchQueryPredicate**](<./doc/entities/ElasticsearchQueryPredicate.md>)
 An entity describing a elasticsearch_query_predicate.
 - [**ElasticsearchQuerySort**](<./doc/entities/ElasticsearchQuerySort.md>)
@@ -127,6 +139,13 @@ An entity describing a range_query_predicate.
 An entity describing a term_query_predicate.
 - [**TermsQueryPredicate**](<./doc/entities/TermsQueryPredicate.md>)
 An entity describing a terms_query_predicate.
+- [**WildcardQueryPredicate**](<./doc/entities/WildcardQueryPredicate.md>)
+The wildcard search query. Supported wildcards are *, which matches any character sequence
+(including the empty one), and ?, which matches any single character. Note this query can be slow,
+as it needs to iterate over many terms. In order to prevent extremely slow WildcardQueries,
+a Wildcard term should not start with one of the wildcards * or ?.
+(The wildcard field type however, is optimized for leading wildcards)
+
 - [**CustomFetcher**](<./doc/entities/CustomFetcher.md>)
 An entity describing a custom_fetcher.
 - [**GraphqlFieldFetcher**](<./doc/entities/GraphqlFieldFetcher.md>)
@@ -157,18 +176,24 @@ An entity describing a argument_assignment_value_fetcher_argument.
 An entity describing a argument_assignment_value_graphql_type_config.
 - [**ArgumentAssignmentValueExpression**](<./doc/entities/ArgumentAssignmentValueExpression.md>)
 An entity describing a argument_assignment_value_expression.
+- [**RestOperationParameter**](<./doc/entities/RestOperationParameter.md>)
+An entity describing a rest_operation_parameter.
 - [**RestOperation**](<./doc/entities/RestOperation.md>)
 An entity describing a rest_operation.
-- [**RestOperationResponse**](<./doc/entities/RestOperationResponse.md>)
-An entity describing a rest_operation_response.
-- [**RestRequestParameter**](<./doc/entities/RestRequestParameter.md>)
-An entity describing a rest_request_parameter.
+- [**RestOperationBodyDefinition**](<./doc/entities/RestOperationBodyDefinition.md>)
+An entity describing a rest_operation_body_definition.
+- [**RestOperationBodySchema**](<./doc/entities/RestOperationBodySchema.md>)
+An entity describing a rest_operation_body_schema.
+- [**RestOperationDependency**](<./doc/entities/RestOperationDependency.md>)
+An entity describing a rest_operation_dependency.
+- [**RestResourceEntry**](<./doc/entities/RestResourceEntry.md>)
+An entity describing a rest_resource_entry.
 - [**RestResource**](<./doc/entities/RestResource.md>)
 An entity describing a rest_resource.
 - [**Service**](<./doc/entities/Service.md>)
 An entity describing a service.
-- [**ElasticSearchClient**](<./doc/entities/ElasticSearchClient.md>)
-An entity describing a elastic_search_client.
+- [**DatasourceEntry**](<./doc/entities/DatasourceEntry.md>)
+An entity describing a datasource_entry.
 - [**GraphqlTypeEntry**](<./doc/entities/GraphqlTypeEntry.md>)
 An entity describing a graphql_type_entry.
 - [**ServiceConfiguration**](<./doc/entities/ServiceConfiguration.md>)

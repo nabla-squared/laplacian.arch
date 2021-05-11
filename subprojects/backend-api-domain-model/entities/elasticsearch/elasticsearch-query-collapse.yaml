@@ -1,0 +1,9 @@
+entities:
+- name: elasticsearch_query_collapse
+  namespace: laplacian.arch.backend.api.elasticsearch.query
+
+  properties:
+  - name: field
+    type: string
+    primary_key: true
+    domain_type_name: identifier

@@ -1,12 +1,12 @@
 package laplacian.arch.backend.api.rest
 import com.github.jknack.handlebars.Context
-import laplacian.arch.backend.api.ApiCallArgument
-import laplacian.arch.backend.api.ApiCallArgumentRecord
-import laplacian.arch.backend.api.rest.RestRequestParameter
-
 import laplacian.arch.backend.api.rest.RestResource
 
-import laplacian.arch.backend.api.rest.RestOperationResponse
+import laplacian.arch.backend.api.rest.RestOperationParameter
+
+import laplacian.arch.backend.api.rest.RestOperationBodyDefinition
+
+import laplacian.arch.backend.api.rest.RestOperationDependency
 
 
 
@@ -45,34 +45,47 @@ data class RestOperationRecord (
             "${method} ${path}"
         }
     /**
-     * The arguments of this rest_operation.
+     * Defines this rest_operation is with_pagination or not.
      */
-    override val arguments: List<ApiCallArgument> by lazy {
-        ApiCallArgumentRecord.from(_record.getList("arguments", emptyList()), _context)
-    }
+    override val withPagination: Boolean
+        get() = getOrThrow("withPagination") {
+            false
+        }
     /**
      * The path_parameters of this rest_operation.
      */
-    override val pathParameters: List<RestRequestParameter> by lazy {
-        RestRequestParameterRecord.from(_record.getList("path_parameters", emptyList()), _context)
+    override val pathParameters: List<RestOperationParameter> by lazy {
+        RestOperationParameterRecord.from(_record.getList("path_parameters", emptyList()), _context)
     }
     /**
      * The query_parameters of this rest_operation.
      */
-    override val queryParameters: List<RestRequestParameter> by lazy {
-        RestRequestParameterRecord.from(_record.getList("query_parameters", emptyList()), _context)
+    override val queryParameters: List<RestOperationParameter> by lazy {
+        RestOperationParameterRecord.from(_record.getList("query_parameters", emptyList()), _context)
     }
     /**
      * The http_headers of this rest_operation.
      */
-    override val httpHeaders: List<RestRequestParameter> by lazy {
-        RestRequestParameterRecord.from(_record.getList("http_headers", emptyList()), _context)
+    override val httpHeaders: List<RestOperationParameter> by lazy {
+        RestOperationParameterRecord.from(_record.getList("http_headers", emptyList()), _context)
     }
     /**
-     * The response of this rest_operation.
+     * The request_body of this rest_operation.
      */
-    override val response: RestOperationResponse by lazy {
-        RestOperationResponseRecord(getOrThrow<Record>("response"), _context)
+    override val requestBody: RestOperationBodyDefinition? by lazy {
+        getOrNull<Record>("request_body")?.let{ RestOperationBodyDefinitionRecord.from(it, _context) }
+    }
+    /**
+     * The response_body of this rest_operation.
+     */
+    override val responseBody: RestOperationBodyDefinition? by lazy {
+        getOrNull<Record>("response_body")?.let{ RestOperationBodyDefinitionRecord.from(it, _context) }
+    }
+    /**
+     * The dependencies of this rest_operation.
+     */
+    override val dependencies: List<RestOperationDependency> by lazy {
+        RestOperationDependencyRecord.from(_record.getList("dependencies", emptyList()), _context)
     }
     /**
      * Returns wether this instance is a rest_operation or not.

@@ -1,0 +1,60 @@
+entities:
+- name: aggregate_access_method
+  namespace: laplacian.arch.backend.api.aggregate
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: type
+    type: string
+    subtype_key: true
+
+  - name: multiple
+    type: boolean
+    optional: true
+    default_value: |
+      true
+
+  - name: with_pagination
+    type: boolean
+    optional: true
+    default_value: |
+      false
+
+  - name: record_model_name
+    type: string
+    optional: true
+    default_value: |
+      aggregate.rootEntity.name
+
+  - name: record_model_namespace
+    type: string
+    optional: true
+    default_value: |
+      aggregate.rootEntity.namespace
+
+  relationships:
+  - name: aggregate
+    reference_entity_name: aggregate
+    reference_entity_namespace: laplacian.arch.backend.api.aggregate
+    cardinality: '1'
+    reverse_of: access_methods
+
+  - name: arguments
+    reference_entity_name: api_call_argument
+    reference_entity_namespace: laplacian.arch.backend.api
+    cardinality: '*'
+    aggregate: true
+
+  - name: record_model
+    reference_entity_name: entity
+    reference_entity_namespace: laplacian.metamodel
+    cardinality: '1'
+    mappings:
+    - from: record_model_name
+      to: name
+    - from: record_model_namespace
+      to: namespace
+

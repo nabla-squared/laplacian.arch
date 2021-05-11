@@ -9,10 +9,6 @@ import laplacian.util.*
  */
 interface ElasticsearchContainerImage : ContainerImage {
     /**
-     * The container_image of this elasticsearch_container_image.
-     */
-    val containerImage: String
-    /**
      * The plugins of this elasticsearch_container_image.
      */
     val plugins: List<String>

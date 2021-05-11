@@ -49,6 +49,18 @@ interface DbContainerDeployment : ContainerDeployment {
      */
     val jdbcConnectionString: String
     /**
+     * Defines this db_container_deployment is enable_db_migration or not.
+     */
+    val enableDbMigration: Boolean
+    /**
+     * Defines this db_container_deployment is generates_ddl_migration or not.
+     */
+    val generatesDdlMigration: Boolean
+    /**
+     * The generated_migration_base_version of this db_container_deployment.
+     */
+    val generatedMigrationBaseVersion: String
+    /**
      * The initial_data of this db_container_deployment.
      */
     val initialData: List<InitialTableData>

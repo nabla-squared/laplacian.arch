@@ -1,0 +1,16 @@
+{{define 'instance_name' (concat deployment.instance_name '-migration') ~}}
+  #
+  # {{deployment.name}} migration task
+  #
+  {{instance_name}}-migration:
+    build:
+      context: ./{{instance_name}}
+      dockerfile: Dockerfile
+    container_name: {{instance_name}}
+    environment:
+    {{define 'prefix' (concat 'datasource.' (hyphen datasource.name) '.') ~}}
+    {{printf "- '%s=%s'" (upper-snake (concat prefix 'username')) deployment.username}}
+    {{printf "- '%s=%s'" (upper-snake (concat prefix 'password')) deployment.password}}
+    {{printf "- '%s=%s'" (upper-snake (concat prefix 'jdbc-url')) deployment.jdbc_connection_string}}
+    networks:
+    - backend

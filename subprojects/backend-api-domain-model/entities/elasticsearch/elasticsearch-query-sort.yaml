@@ -7,6 +7,9 @@ entities:
     type: string
     primary_key: true
     subtype_key: true
+    optional: true
+    default_value: |
+      "field"
 
   - name: order
     type: string
@@ -34,4 +37,6 @@ entities:
 
   properties:
   - name: name
+    description: |
+      Name of sorting field.
     type: string

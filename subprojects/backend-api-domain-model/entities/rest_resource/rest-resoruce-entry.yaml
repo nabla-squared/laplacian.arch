@@ -1,0 +1,25 @@
+entities:
+- name: rest_resource_entry
+  namespace: laplacian.arch.backend.api.rest
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+    domain_type_name: identifier
+
+  - name: namespace
+    type: string
+    primary_key: true
+    domain_type_name: namespace
+
+  relationships:
+  - name: rest_resource
+    reference_entity_name: rest_resource
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '1'
+    mappings:
+    - from: name
+      to: name
+    - from: namespace
+      to: namespace

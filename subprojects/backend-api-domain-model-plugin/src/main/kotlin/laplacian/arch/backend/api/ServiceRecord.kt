@@ -1,9 +1,19 @@
 package laplacian.arch.backend.api
 import com.github.jknack.handlebars.Context
-import laplacian.arch.backend.api.datasource.DatasourceEntry
-import laplacian.arch.backend.api.datasource.DatasourceEntryRecord
+import laplacian.arch.backend.api.aggregate.AggregateEntry
+import laplacian.arch.backend.api.aggregate.AggregateEntryRecord
+import laplacian.arch.backend.api.aggregate.Aggregate
+import laplacian.arch.backend.api.aggregate.AggregateRecord
+import laplacian.arch.backend.api.rest.RestResourceEntry
+import laplacian.arch.backend.api.rest.RestResourceEntryRecord
+import laplacian.arch.backend.api.rest.RestResource
+import laplacian.arch.backend.api.rest.RestResourceRecord
+import laplacian.arch.backend.api.DatasourceEntry
+
 import laplacian.arch.backend.api.datasource.Datasource
 import laplacian.arch.backend.api.datasource.DatasourceRecord
+import laplacian.arch.backend.api.elasticsearch.ElasticsearchClient
+import laplacian.arch.backend.api.elasticsearch.ElasticsearchClientRecord
 import laplacian.arch.backend.api.GraphqlTypeEntry
 
 import laplacian.arch.backend.api.graphql.GraphqlType
@@ -24,8 +34,6 @@ import laplacian.arch.backend.api.data_file.DataFile
 import laplacian.arch.backend.api.data_file.DataFileRecord
 import laplacian.arch.backend.api.rest.RestApiFetcher
 import laplacian.arch.backend.api.rest.RestApiFetcherRecord
-import laplacian.arch.backend.api.rest.RestResource
-import laplacian.arch.backend.api.rest.RestResourceRecord
 import laplacian.arch.backend.api.ServiceConfiguration
 
 
@@ -47,17 +55,15 @@ data class ServiceRecord (
     override val name: String
         get() = getOrThrow("name")
     /**
+     * The namespace of this service.
+     */
+    override val namespace: String
+        get() = getOrThrow("namespace")
+    /**
      * The version of this service.
      */
     override val version: String
         get() = getOrThrow("version")
-    /**
-     * The namespace of this service.
-     */
-    override val namespace: String
-        get() = getOrThrow("namespace") {
-            "${_context.get("project.namespace")}.service.${name.lowerUnderscorize()}"
-        }
     /**
      * The description of this service.
      */
@@ -74,7 +80,7 @@ data class ServiceRecord (
      * Defines this service is depends_on_elasticsearch or not.
      */
     override val dependsOnElasticsearch: Boolean
-        get() = elasticsearchIndexes.isNotEmpty()
+        get() = elasticsearchIndexes.isNotEmpty() || aggregates.any{ it.dependsOnElasticsearch }
     /**
      * Defines this service is depends_on_cache or not.
      */
@@ -94,7 +100,7 @@ data class ServiceRecord (
      * Defines this service is depends_on_mybatis or not.
      */
     override val dependsOnMybatis: Boolean
-        get() = graphqlTypes.any{ it.dependsOnMybatis }
+        get() = graphqlTypes.any{ it.dependsOnMybatis } || aggregates.any{ it.dependsOnMybatis }
     /**
      * Defines this service is depends_on_blocking_postgres_datasource or not.
      */
@@ -123,6 +129,30 @@ data class ServiceRecord (
             emptyList<String>()
         }
     /**
+     * The aggregate_entries of this service.
+     */
+    override val aggregateEntries: List<AggregateEntry> by lazy {
+        AggregateEntryRecord.from(_record.getList("aggregate_entries", emptyList()), _context)
+    }
+    /**
+     * The aggregates of this service.
+     */
+    override val aggregates: List<Aggregate> by lazy {
+        aggregateEntries.map{ it.aggregate }
+    }
+    /**
+     * The rest_resource_entries of this service.
+     */
+    override val restResourceEntries: List<RestResourceEntry> by lazy {
+        RestResourceEntryRecord.from(_record.getList("rest_resource_entries", emptyList()), _context)
+    }
+    /**
+     * The rest_resources of this service.
+     */
+    override val restResources: List<RestResource> by lazy {
+        restResourceEntries.map{ it.restResource }
+    }
+    /**
      * The datasource_entries of this service.
      */
     override val datasourceEntries: List<DatasourceEntry> by lazy {
@@ -135,6 +165,12 @@ data class ServiceRecord (
         datasourceEntries.map{ it.datasource }.distinct()
     }
     /**
+     * The primary_datasource of this service.
+     */
+    override val primaryDatasource: Datasource? by lazy {
+        datasourceEntries.find{ it.primary }?.datasource
+    }
+    /**
      * The blocking_datasources of this service.
      */
     override val blockingDatasources: List<Datasource> by lazy {
@@ -145,6 +181,18 @@ data class ServiceRecord (
      */
     override val nonBlockingDatasources: List<Datasource> by lazy {
         datasources.filter{ it.nonBlocking }
+    }
+    /**
+     * The elasticsearch_clients of this service.
+     */
+    override val elasticsearchClients: List<ElasticsearchClient> by lazy {
+        ElasticsearchClientRecord.from(_record.getList("elasticsearch_clients", emptyList()), _context)
+    }
+    /**
+     * The primary_elasticsearch_client of this service.
+     */
+    override val primaryElasticsearchClient: ElasticsearchClient? by lazy {
+        elasticsearchClients.find{ it.primary }
     }
     /**
      * The graphql_type_entries of this service.
@@ -212,12 +260,6 @@ data class ServiceRecord (
      */
     override val restApiFetchers: List<RestApiFetcher> by lazy {
         graphqlFieldFetchers.filterIsInstance<RestApiFetcher>()
-    }
-    /**
-     * The rest_resources of this service.
-     */
-    override val restResources: List<RestResource> by lazy {
-        restApiFetchers.map{ it.restResource }.distinct()
     }
     /**
      * The configurations of this service.

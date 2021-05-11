@@ -1,0 +1,41 @@
+entities:
+- name: aggregate
+  namespace: laplacian.arch.backend.api.aggregate
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+    domain_type_name: identifier
+
+  - name: namespace
+    type: string
+    primary_key: true
+    domain_type_name: namespace
+
+  - name: depends_on_mybatis
+    type: boolean
+    snippet: |
+      accessMethods.any{ it.type == "mybatis" }
+
+  - name: depends_on_elasticsearch
+    type: boolean
+    snippet: |
+      accessMethods.any{ it.type == "elasticsearch" }
+
+  relationships:
+  - name: root_entity
+    cardinality: '1'
+    reference_entity_name: entity
+    reference_entity_namespace: laplacian.metamodel
+    mappings:
+    - from: name
+      to: name
+    - from: namespace
+      to: namespace
+
+  - name: access_methods
+    cardinality: '*'
+    reference_entity_name: aggregate_access_method
+    reference_entity_namespace: laplacian.arch.backend.api.aggregate
+    aggregate: true

@@ -5,7 +5,9 @@ SCRIPT_BASE_DIR="$PROJECT_BASE_DIR/scripts"
 DEPLOYMENT_BASE_DIR=$PROJECT_BASE_DIR/environments/{{hyphen environment.name}}
 COMPONENT_BASE_DIR=$PROJECT_BASE_DIR/components
 {{define 'deployment_components' (unique (map environment.deployments '@it.component')) ~}}
-{{define 'deployments_with_migration' (unique (filter environment.deployments '@it.initial_data')) ~}}
+{{define 'db_migrations'
+  (unique (filter environment.deployments '(and @it.isa_db_container_deployment @it.initial_data)'))
+~}}
 
 main () {
   build_components
@@ -24,7 +26,7 @@ build_components() {
 
 build_migration_tasks() {
   echo "Building data migration tasks..."
-  {{#each deployments_with_migration as |deployment| ~}}
+  {{#each db_migrations as |deployment| ~}}
   build_{{lower-snake deployment.name}}_migration
   {{/each}}
 }

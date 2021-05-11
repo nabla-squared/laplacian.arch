@@ -1,5 +1,4 @@
 package laplacian.arch.backend.api.rest
-import laplacian.arch.backend.api.ApiCallArgument
 
 
 import laplacian.util.*
@@ -25,29 +24,37 @@ interface RestOperation {
      */
     val description: String
     /**
-     * The arguments of this rest_operation.
+     * Defines this rest_operation is with_pagination or not.
      */
-    val arguments: List<ApiCallArgument>
-    /**
-     * The path_parameters of this rest_operation.
-     */
-    val pathParameters: List<RestRequestParameter>
-    /**
-     * The query_parameters of this rest_operation.
-     */
-    val queryParameters: List<RestRequestParameter>
-    /**
-     * The http_headers of this rest_operation.
-     */
-    val httpHeaders: List<RestRequestParameter>
+    val withPagination: Boolean
     /**
      * The rest_resource of this rest_operation.
      */
     val restResource: RestResource
     /**
-     * The response of this rest_operation.
+     * The path_parameters of this rest_operation.
      */
-    val response: RestOperationResponse
+    val pathParameters: List<RestOperationParameter>
+    /**
+     * The query_parameters of this rest_operation.
+     */
+    val queryParameters: List<RestOperationParameter>
+    /**
+     * The http_headers of this rest_operation.
+     */
+    val httpHeaders: List<RestOperationParameter>
+    /**
+     * The request_body of this rest_operation.
+     */
+    val requestBody: RestOperationBodyDefinition?
+    /**
+     * The response_body of this rest_operation.
+     */
+    val responseBody: RestOperationBodyDefinition?
+    /**
+     * The dependencies of this rest_operation.
+     */
+    val dependencies: List<RestOperationDependency>
     /**
      * Returns wether this instance is a rest_operation or not.
      */

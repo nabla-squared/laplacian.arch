@@ -1,0 +1,7 @@
+{{define 'index_model' index_data.index_model ~}}
+{{define 'fields' index_model.stored_properties ~}}
+{{define 'records' index_data.dataset.content ~}}
+{{#each records as |record| ~}}
+{"index":{}}
+{{printf '{'}}{{#each fields as |field|}}{{dquote (lower-snake field.table_column_name)}}:{{dquote (lookup record field.name)}}{{if (not @last) ','}}{{/each}}{{printf '}'}}
+{{/each}}

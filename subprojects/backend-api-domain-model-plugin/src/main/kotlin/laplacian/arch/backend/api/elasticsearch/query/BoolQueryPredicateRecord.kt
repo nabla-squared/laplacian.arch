@@ -16,6 +16,11 @@ data class BoolQueryPredicateRecord (
 ): ElasticsearchQueryPredicateRecord(__record, _context), BoolQueryPredicate {
 
     /**
+     * The minimum_should_match of this bool_query_predicate.
+     */
+    override val minimumShouldMatch: String?
+        by _record
+    /**
      * The must of this bool_query_predicate.
      */
     override val must: List<ElasticsearchQueryPredicate> by lazy {

@@ -87,6 +87,14 @@ interface Springboot2ApiServiceContainerImage : ContainerImage {
      */
     val springbootMybatisVersion: String
     /**
+     * The elasticsearch_version of this springboot2_api_service_container_image.
+     */
+    val elasticsearchVersion: String
+    /**
+     * The springdoc_openapi_version of this springboot2_api_service_container_image.
+     */
+    val springdocOpenapiVersion: String
+    /**
      * The datasource_proxy_version of this springboot2_api_service_container_image.
      */
     val datasourceProxyVersion: String

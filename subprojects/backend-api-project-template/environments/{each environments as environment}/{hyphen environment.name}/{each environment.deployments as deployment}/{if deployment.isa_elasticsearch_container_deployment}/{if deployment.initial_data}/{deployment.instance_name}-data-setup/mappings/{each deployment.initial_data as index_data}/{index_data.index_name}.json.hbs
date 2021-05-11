@@ -1,0 +1,19 @@
+{{define 'index_model' index_data.index_model ~}}
+{{define 'fields' index_model.stored_properties ~}}
+{
+  "mappings": {
+    "properties": {
+      {{#each fields as |field| ~}}
+      {{define 'field_type_annotation' (find field.tags '(starts-with @it "elasticsearch_field_type:")') ~}}
+      {{define 'field_type' (case
+        field_type_annotation (starts-with field_type_annotation "elasticsearch_field_type:")
+        (eq field.type 'number') 'long'
+        (eq field.type 'float') 'double'
+        'text'
+      ) ~}}
+      {{dquote field.table_column_name}}: { "type": {{dquote field_type}} }{{if (not @last) ','}}
+      {{/each}}
+    }
+  }
+}
+

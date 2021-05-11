@@ -48,7 +48,7 @@ entities:
     type: number
     optional: true
 
-  - name: max-lifetime
+  - name: max_lifetime
     type: number
     optional: true
 

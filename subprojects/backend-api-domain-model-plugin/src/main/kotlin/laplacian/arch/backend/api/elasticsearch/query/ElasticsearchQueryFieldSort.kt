@@ -9,7 +9,8 @@ import laplacian.util.*
  */
 interface ElasticsearchQueryFieldSort : ElasticsearchQuerySort {
     /**
-     * The name of this elasticsearch_query_field_sort.
+     * Name of sorting field.
+
      */
     val name: String
     /**

@@ -11,6 +11,7 @@ import laplacian.arch.backend.api.elasticsearch.query.QueryStringPredicateRecord
 import laplacian.arch.backend.api.elasticsearch.query.RangeQueryPredicateRecord
 import laplacian.arch.backend.api.elasticsearch.query.TermQueryPredicateRecord
 import laplacian.arch.backend.api.elasticsearch.query.TermsQueryPredicateRecord
+import laplacian.arch.backend.api.elasticsearch.query.WildcardQueryPredicateRecord
 
 import laplacian.generate.util.*
 /**
@@ -52,8 +53,9 @@ open class ElasticsearchQueryPredicateRecord (
                 "range" -> RangeQueryPredicateRecord(record, _context)
                 "term" -> TermQueryPredicateRecord(record, _context)
                 "terms" -> TermsQueryPredicateRecord(record, _context)
+                "wildcard" -> WildcardQueryPredicateRecord(record, _context)
                 else -> throw IllegalArgumentException(
-                    "The given record has undefined type $type. It is should be one of [bool, exists, match_all, match, multi_match, query_string, range, term, terms]. Record: $record"
+                    "The given record has undefined type $type. It is should be one of [bool, exists, match_all, match, multi_match, query_string, range, term, terms, wildcard]. Record: $record"
                 )
             }
     }

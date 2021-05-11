@@ -14,20 +14,27 @@ data class TermQueryPredicateRecord (
 ): ElasticsearchQueryPredicateRecord(__record, _context), TermQueryPredicate {
 
     /**
-     * The field of this term_query_predicate.
+     * Field you wish to search.
      */
     override val field: String
         get() = getOrThrow("field")
     /**
-     * The value of this term_query_predicate.
+     * Term you wish to find in the provided <field>. To return a document,
+the term must exactly match the field value, including whitespace and capitalization.
      */
     override val value: String
         get() = getOrThrow("value")
     /**
-     * The boost of this term_query_predicate.
+     * Floating point number used to decrease or increase the relevance scores of a query.
      */
-    override val boost: Int
-        get() = getOrThrow("boost")
+    override val boost: Double?
+        by _record
+    /**
+     * Allows ASCII case insensitive matching of the value with the indexed field values when set to true.
+Default is false which means the case sensitivity of matching depends on the underlying field’s mapping.
+     */
+    override val caseInsensitive: Boolean?
+        by _record
     /**
      * Returns wether this instance is a term_query_predicate or not.
      */

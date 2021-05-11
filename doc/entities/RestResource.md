@@ -15,6 +15,13 @@ An entity describing a rest_resource.
 The name of this rest_resource.
 - **Attributes:** *PK*
 
+### namespace: `String`
+The namespace of this rest_resource.
+- **Attributes:** *PK*
+
+### path: `String`
+The path of this rest_resource.
+
 ### description: `String`
 The description of this rest_resource.
 - **Default Value:**
@@ -24,16 +31,6 @@ The description of this rest_resource.
 
 ### resource_model_name: `String`
 The resource_model_name of this rest_resource.
-
-### base_url: `String`
-The base_url of this rest_resource.
-
-### enable_automatic_cookie_handling: `Boolean`
-Defines this rest_resource is enable_automatic_cookie_handling or not.
-- **Default Value:**
-  ```kotlin
-  false
-  ```
 
 ## Relationships
 

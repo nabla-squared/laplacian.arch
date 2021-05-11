@@ -2,6 +2,8 @@ package laplacian.arch.deployment.component.springboot2_api_service
 import com.github.jknack.handlebars.Context
 import laplacian.arch.deployment.datasource.DatasourceConfiguration
 import laplacian.arch.deployment.datasource.DatasourceConfigurationRecord
+import laplacian.arch.deployment.component.elasticsearch.ElasticsearchClientConfiguration
+import laplacian.arch.deployment.component.elasticsearch.ElasticsearchClientConfigurationRecord
 import laplacian.arch.deployment.Environment
 import laplacian.arch.deployment.EnvironmentRecord
 
@@ -58,6 +60,12 @@ data class Springboot2ApiServiceContainerDeploymentRecord (
      */
     override val datasources: List<DatasourceConfiguration> by lazy {
         DatasourceConfigurationRecord.from(_record.getList("datasources", emptyList()), _context)
+    }
+    /**
+     * The elasticsearch_clients of this springboot2_api_service_container_deployment.
+     */
+    override val elasticsearchClients: List<ElasticsearchClientConfiguration> by lazy {
+        ElasticsearchClientConfigurationRecord.from(_record.getList("elasticsearch_clients", emptyList()), _context)
     }
     /**
      * Returns wether this instance is a springboot2_api_service_container_deployment or not.

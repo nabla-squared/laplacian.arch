@@ -2,3 +2,24 @@ kotlinVersion={{component.kotlin_version}}
 kotlinCoroutineVersion={{component.kotlin_coroutine_version}}
 kotlinJvmTarget={{component.jdk_major_version}}
 graphqlJavaVersion={{component.graphql_java_version}}
+{{#if service.depends_on_mybatis ~}}
+springbootMybatisVersion={{trim component.springboot_mybatis_version}}
+{{~/if}}
+{{#if service.blocking_datasources ~}}
+datasourceProxyVersion={{trim component.datasource_proxy_version}}
+{{/if}}
+{{#if service.depends_on_blocking_oracle_datasource ~}}
+oracleJdbcDriverVersion={{trim component.oracle_jdbc_driver_version}}
+{{~/if}}
+{{#if service.depends_on_blocking_postgres_datasource ~}}
+postgresJdbcDriverVersion={{trim component.postgres_jdbc_driver_version}}
+{{~/if}}
+{{#if service.depends_on_blocking_mysql_datasource ~}}
+mysqlJdbcDriverVersion={{trim component.mysql_jdbc_driver_version}}
+{{~/if}}
+{{#if service.depends_on_elasticsearch ~}}
+elasticsearchVersion={{trim component.elasticsearch_version}}
+{{/if}}
+{{#each component.additional_libraries as |library| ~}}
+{{lower-camel library.name}}Version={{library.version}}
+{{/each}}

@@ -1,5 +1,6 @@
 package laplacian.arch.deployment.component.springboot2_api_service
 import laplacian.arch.deployment.datasource.DatasourceConfiguration
+import laplacian.arch.deployment.component.elasticsearch.ElasticsearchClientConfiguration
 
 import laplacian.arch.deployment.container.ContainerDeployment
 
@@ -33,6 +34,10 @@ interface Springboot2ApiServiceContainerDeployment : ContainerDeployment {
      * The datasources of this springboot2_api_service_container_deployment.
      */
     val datasources: List<DatasourceConfiguration>
+    /**
+     * The elasticsearch_clients of this springboot2_api_service_container_deployment.
+     */
+    val elasticsearchClients: List<ElasticsearchClientConfiguration>
     /**
      * Returns wether this instance is a springboot2_api_service_container_deployment or not.
      */

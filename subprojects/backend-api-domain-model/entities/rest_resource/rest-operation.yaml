@@ -21,58 +21,65 @@ entities:
     default_value: |
       "${method} ${path}"
 
-  relationships:
-  - name: arguments
-    reference_entity_name: api_call_argument
-    reference_entity_namespace: laplacian.arch.backend.api
-    cardinality: '*'
-    aggregate: true
-
-  - name: path_parameters
-    reference_entity_name: rest_request_parameter
-    cardinality: '*'
-    aggregate: true
-
-  - name: query_parameters
-    reference_entity_name: rest_request_parameter
-    cardinality: '*'
-    aggregate: true
-
-  - name: http_headers
-    reference_entity_name: rest_request_parameter
-    cardinality: '*'
-    aggregate: true
-
-  - name: rest_resource
-    reference_entity_name: rest_resource
-    cardinality: '1'
-    reverse_of: operations
-
-  - name: response
-    reference_entity_name: rest_operation_response
-    reference_entity_namespace: laplacian.arch.backend.api.rest
-    cardinality: '1'
-    aggregate: true
-
-- name: rest_operation_response
-  namespace: laplacian.arch.backend.api.rest
-
-  properties:
-  - name: type
-    type: string
-    domain:
-      choices:
-      - value: string
-      - value: number
-      - value: boolean
-      - value: array
-      - value: object
-
-  - name: optional
+  - name: with_pagination
     type: boolean
     optional: true
     default_value: |
       false
+
+  relationships:
+  - name: rest_resource
+    reference_entity_name: rest_resource
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '1'
+    reverse_of: operations
+
+  - name: path_parameters
+    reference_entity_name: rest_operation_parameter
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '*'
+    aggregate: true
+
+  - name: query_parameters
+    reference_entity_name: rest_operation_parameter
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '*'
+    aggregate: true
+
+  - name: http_headers
+    reference_entity_name: rest_operation_parameter
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '*'
+    aggregate: true
+
+  - name: request_body
+    reference_entity_name: rest_operation_body_definition
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '0..1'
+    aggregate: true
+
+  - name: response_body
+    reference_entity_name: rest_operation_body_definition
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '0..1'
+    aggregate: true
+
+  - name: dependencies
+    reference_entity_name: rest_operation_dependency
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '*'
+    aggregate: true
+
+- name: rest_operation_body_definition
+  namespace: laplacian.arch.backend.api.rest
+
+  properties:
+  - name: format
+    type: string
+    domain:
+      choices:
+      - value: json
+      - value: csv
 
   - name: multiple
     type: boolean
@@ -80,14 +87,81 @@ entities:
     default_value: |
       false
 
-  - name: type_in_java
+  - name: optional
+    type: boolean
+    optional: true
+    default_value: |
+      false
+
+  relationships:
+  - name: schema
+    reference_entity_name: rest_operation_body_schema
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '1'
+    aggregate: true
+
+- name: rest_operation_body_schema
+  namespace: laplacian.arch.backend.api.rest
+
+  properties:
+  - name: name
     type: string
+    primary_key: true
+    domain_type_name: identifier
+
+  - name: namespace
+    type: string
+    primary_key: true
+    domain_type_name: namespace
+
+  relationships:
+  - name: model
+    reference_entity_name: entity
+    reference_entity_namespace: laplacian.metamodel
+    cardinality: '1'
+    mappings:
+    - from: name
+      to: name
+    - from: namespace
+      to: namespace
+
+
+- name: rest_operation_dependency
+  namespace: laplacian.arch.backend.api.rest
+
+  properties:
+  - name: type
+    type: string
+    domain:
+      choices:
+      - value: aggregate_data_access
+
+  - name: aggregate_name
+    type: string
+    domain_type_name: identifier
+
+  - name: aggregate_namespace
+    type: string
+    domain_type_name: namespace
+
+  - name: method_name
+    type: string
+    domain_type_name: identifer
+
+  relationships:
+  - name: aggregate
+    reference_entity_name: aggregate
+    reference_entity_namespace: laplacian.arch.backend.api.aggregate
+    cardinality: '1'
+    mappings:
+    - from: aggregate_name
+      to: name
+    - from: aggregate_namespace
+      to: namespace
+
+  - name: access_method
+    reference_entity_name: aggregate_access_method
+    reference_entity_namespace: laplacian.arch.backend.api.aggregate
+    cardinality: '1'
     snippet: |
-      when(type) {
-          "number" -> "Int"
-          "object" -> "Map<String, Any?>"
-          "array" -> "List<Any>"
-          else -> type.upperCamelize()
-      }.let {
-          (if (multiple) "List<$it>" else it) + (if (optional) "?" else "")
-      }
+      aggregate.accessMethods.find{ it.name == methodName }!!

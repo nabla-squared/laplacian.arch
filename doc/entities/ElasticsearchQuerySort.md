@@ -14,6 +14,10 @@ An entity describing a elasticsearch_query_sort.
 ### type: `String`
 The type of this elasticsearch_query_sort.
 - **Attributes:** *PK*
+- **Default Value:**
+  ```kotlin
+  "field"
+  ```
 
 ### order: `String`
 The order of this elasticsearch_query_sort.

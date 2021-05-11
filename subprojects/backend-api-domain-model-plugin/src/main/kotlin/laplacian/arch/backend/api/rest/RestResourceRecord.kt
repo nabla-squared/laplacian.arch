@@ -23,6 +23,16 @@ data class RestResourceRecord (
     override val name: String
         get() = getOrThrow("name")
     /**
+     * The namespace of this rest_resource.
+     */
+    override val namespace: String
+        get() = getOrThrow("namespace")
+    /**
+     * The path of this rest_resource.
+     */
+    override val path: String
+        get() = getOrThrow("path")
+    /**
      * The description of this rest_resource.
      */
     override val description: String
@@ -34,18 +44,6 @@ data class RestResourceRecord (
      */
     override val resourceModelName: String?
         by _record
-    /**
-     * The base_url of this rest_resource.
-     */
-    override val baseUrl: String
-        get() = getOrThrow("baseUrl")
-    /**
-     * Defines this rest_resource is enable_automatic_cookie_handling or not.
-     */
-    override val enableAutomaticCookieHandling: Boolean
-        get() = getOrThrow("enableAutomaticCookieHandling") {
-            false
-        }
     /**
      * The operations of this rest_resource.
      */
@@ -79,17 +77,20 @@ data class RestResourceRecord (
         if (this === other) return true
         if (other !is RestResourceRecord) return false
         if (name != other.name) return false
+        if (namespace != other.namespace) return false
         return true
     }
 
     override fun hashCode(): Int {
         var result = name.hashCode()
+        result = 31 * result + namespace.hashCode()
         return result
     }
 
     override fun toString(): String {
         return "RestResourceRecord(" +
-            "name=$name" +
+            "name=$name, " +
+            "namespace=$namespace" +
         ")"
     }
 }

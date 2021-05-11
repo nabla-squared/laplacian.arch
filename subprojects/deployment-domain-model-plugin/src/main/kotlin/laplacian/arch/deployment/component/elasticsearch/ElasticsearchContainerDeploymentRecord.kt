@@ -1,5 +1,7 @@
 package laplacian.arch.deployment.component.elasticsearch
 import com.github.jknack.handlebars.Context
+import laplacian.arch.deployment.component.elasticsearch.InitialIndexData
+
 import laplacian.arch.deployment.Environment
 import laplacian.arch.deployment.EnvironmentRecord
 
@@ -23,6 +25,19 @@ data class ElasticsearchContainerDeploymentRecord (
         get() = getOrThrow("port") {
             9200
         }
+    /**
+     * The tag of this elasticsearch_container_deployment.
+     */
+    override val tag: String
+        get() = getOrThrow("tag") {
+            "7.12.1"
+        }
+    /**
+     * The initial_data of this elasticsearch_container_deployment.
+     */
+    override val initialData: List<InitialIndexData> by lazy {
+        InitialIndexDataRecord.from(_record.getList("initial_data", emptyList()), _context)
+    }
     /**
      * Returns wether this instance is a elasticsearch_container_deployment or not.
      */

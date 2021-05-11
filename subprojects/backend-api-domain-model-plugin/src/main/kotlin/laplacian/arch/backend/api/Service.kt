@@ -1,6 +1,10 @@
 package laplacian.arch.backend.api
-import laplacian.arch.backend.api.datasource.DatasourceEntry
+import laplacian.arch.backend.api.aggregate.AggregateEntry
+import laplacian.arch.backend.api.aggregate.Aggregate
+import laplacian.arch.backend.api.rest.RestResourceEntry
+import laplacian.arch.backend.api.rest.RestResource
 import laplacian.arch.backend.api.datasource.Datasource
+import laplacian.arch.backend.api.elasticsearch.ElasticsearchClient
 import laplacian.arch.backend.api.graphql.GraphqlType
 import laplacian.arch.backend.api.elasticsearch.ElasticsearchIndex
 import laplacian.arch.backend.api.graphql.GraphqlField
@@ -10,7 +14,6 @@ import laplacian.arch.backend.api.cache.RedisCachePolicy
 import laplacian.arch.backend.api.data_file.DataFileFetcher
 import laplacian.arch.backend.api.data_file.DataFile
 import laplacian.arch.backend.api.rest.RestApiFetcher
-import laplacian.arch.backend.api.rest.RestResource
 
 
 import laplacian.util.*
@@ -24,13 +27,13 @@ interface Service {
      */
     val name: String
     /**
-     * The version of this service.
-     */
-    val version: String
-    /**
      * The namespace of this service.
      */
     val namespace: String
+    /**
+     * The version of this service.
+     */
+    val version: String
     /**
      * The description of this service.
      */
@@ -80,6 +83,22 @@ interface Service {
      */
     val instrumentations: List<String>
     /**
+     * The aggregate_entries of this service.
+     */
+    val aggregateEntries: List<AggregateEntry>
+    /**
+     * The aggregates of this service.
+     */
+    val aggregates: List<Aggregate>
+    /**
+     * The rest_resource_entries of this service.
+     */
+    val restResourceEntries: List<RestResourceEntry>
+    /**
+     * The rest_resources of this service.
+     */
+    val restResources: List<RestResource>
+    /**
      * The datasource_entries of this service.
      */
     val datasourceEntries: List<DatasourceEntry>
@@ -88,6 +107,10 @@ interface Service {
      */
     val datasources: List<Datasource>
     /**
+     * The primary_datasource of this service.
+     */
+    val primaryDatasource: Datasource?
+    /**
      * The blocking_datasources of this service.
      */
     val blockingDatasources: List<Datasource>
@@ -95,6 +118,14 @@ interface Service {
      * The non_blocking_datasources of this service.
      */
     val nonBlockingDatasources: List<Datasource>
+    /**
+     * The elasticsearch_clients of this service.
+     */
+    val elasticsearchClients: List<ElasticsearchClient>
+    /**
+     * The primary_elasticsearch_client of this service.
+     */
+    val primaryElasticsearchClient: ElasticsearchClient?
     /**
      * The graphql_type_entries of this service.
      */
@@ -139,10 +170,6 @@ interface Service {
      * The rest_api_fetchers of this service.
      */
     val restApiFetchers: List<RestApiFetcher>
-    /**
-     * The rest_resources of this service.
-     */
-    val restResources: List<RestResource>
     /**
      * The configurations of this service.
      */

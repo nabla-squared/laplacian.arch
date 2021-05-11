@@ -49,6 +49,21 @@ entities:
   - name: jdbc_connection_string
     type: string
 
+  - name: enable_db_migration
+    type: boolean
+    default_value: |
+      initialData.isNotEmpty()
+
+  - name: generates_ddl_migration
+    type: boolean
+    default_value: |
+      enableDbMigration
+
+  - name: generated_migration_base_version
+    type: string
+    default_value: |
+      "1.0"
+
   relationships:
   - name: initial_data
     reference_entity_name: initial_table_data

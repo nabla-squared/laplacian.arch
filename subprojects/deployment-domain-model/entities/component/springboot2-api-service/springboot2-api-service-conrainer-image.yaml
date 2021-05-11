@@ -82,7 +82,7 @@ entities:
     type: string
     optional: true
     default_value: |
-      "5.2.7.RELEASE"
+      "5.3.6.RELEASE"
 
   - name: reactor_version
     type: string
@@ -94,7 +94,7 @@ entities:
     type: string
     optional: true
     default_value: |
-      "2.3.1.RELEASE"
+      "2.4.5"
 
   - name: springboot_graphql_webflux_version
     type: string
@@ -106,7 +106,7 @@ entities:
     type: string
     optional: true
     default_value: |
-      "1.0.9.RELEASE"
+      "1.0.11.RELEASE"
 
   - name: graphql_java_version
     type: string
@@ -125,6 +125,18 @@ entities:
     optional: true
     default_value: |
       "2.1.4"
+
+  - name: elasticsearch_version
+    type: string
+    optional: true
+    default_value: |
+      "7.12.1"
+
+  - name: springdoc_openapi_version
+    type: string
+    optional: true
+    default_value: |
+      "1.5.7"
 
   - name: datasource_proxy_version
     type: string

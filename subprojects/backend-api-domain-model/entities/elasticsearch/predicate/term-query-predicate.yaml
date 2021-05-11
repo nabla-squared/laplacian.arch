@@ -7,9 +7,24 @@ entities:
   properties:
   - name: field
     type: string
+    description: |
+      Field you wish to search.
 
   - name: value
     type: string
+    description: |
+      Term you wish to find in the provided <field>. To return a document,
+      the term must exactly match the field value, including whitespace and capitalization.
 
   - name: boost
-    type: number
+    type: double
+    optional: true
+    description: |
+      Floating point number used to decrease or increase the relevance scores of a query.
+
+  - name: case_insensitive
+    type: boolean
+    optional: true
+    description: |
+      Allows ASCII case insensitive matching of the value with the indexed field values when set to true.
+      Default is false which means the case sensitivity of matching depends on the underlying field’s mapping.

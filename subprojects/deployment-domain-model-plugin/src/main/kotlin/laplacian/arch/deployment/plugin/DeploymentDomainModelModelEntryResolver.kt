@@ -6,6 +6,10 @@ import laplacian.arch.deployment.component.AllComponents
 import laplacian.arch.deployment.component.ComponentRecord
 import laplacian.arch.deployment.component.container.AllEnvironmentVariableDefinitions
 import laplacian.arch.deployment.component.container.EnvironmentVariableDefinitionRecord
+import laplacian.arch.deployment.component.elasticsearch.AllElasticsearchClientConfigurations
+import laplacian.arch.deployment.component.elasticsearch.ElasticsearchClientConfigurationRecord
+import laplacian.arch.deployment.component.elasticsearch.AllInitialIndexDatas
+import laplacian.arch.deployment.component.elasticsearch.InitialIndexDataRecord
 import laplacian.arch.deployment.component.elasticsearch.AllConfigurationFiles
 import laplacian.arch.deployment.component.elasticsearch.ConfigurationFileRecord
 import laplacian.arch.deployment.component.AllMavenArtifacts
@@ -34,6 +38,8 @@ class DeploymentDomainModelModelEntryResolver: ModelEntryResolver {
         return arrayOf(
             "components",
             "environment_variable_definitions",
+            "elasticsearch_client_configurations",
+            "initial_index_datas",
             "configuration_files",
             "maven_artifacts",
             "redis_container_deployments",
@@ -58,6 +64,18 @@ class DeploymentDomainModelModelEntryResolver: ModelEntryResolver {
                 model.getList<Record>("environment_variable_definitions", emptyList())
                      .mergeWithKeys("name")
                      .let{ EnvironmentVariableDefinitionRecord.from(it, context.currentModel) },
+                context.currentModel
+            )
+            "elasticsearch_client_configurations" -> AllElasticsearchClientConfigurations(
+                model.getList<Record>("elasticsearch_client_configurations", emptyList())
+                     .mergeWithKeys("name")
+                     .let{ ElasticsearchClientConfigurationRecord.from(it, context.currentModel) },
+                context.currentModel
+            )
+            "initial_index_datas" -> AllInitialIndexDatas(
+                model.getList<Record>("initial_index_datas", emptyList())
+                     .mergeWithKeys("index_model_name")
+                     .let{ InitialIndexDataRecord.from(it, context.currentModel) },
                 context.currentModel
             )
             "configuration_files" -> AllConfigurationFiles(

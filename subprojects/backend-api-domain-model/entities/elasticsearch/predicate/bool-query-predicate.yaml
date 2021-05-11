@@ -4,6 +4,11 @@ entities:
   supertype_name: elasticsearch_query_predicate
   subtype_key_value: bool
 
+  properties:
+   - name: minimum_should_match
+     type: string
+     optional: true
+
   relationships:
   - name: must
     reference_entity_name: elasticsearch_query_predicate

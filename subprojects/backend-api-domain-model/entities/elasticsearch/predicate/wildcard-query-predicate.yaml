@@ -1,0 +1,41 @@
+entities:
+- name: wildcard_query_predicate
+  namespace: laplacian.arch.backend.api.elasticsearch.query
+  supertype_name: elasticsearch_query_predicate
+  subtype_key_value: wildcard
+  description: |
+    The wildcard search query. Supported wildcards are *, which matches any character sequence
+    (including the empty one), and ?, which matches any single character. Note this query can be slow,
+    as it needs to iterate over many terms. In order to prevent extremely slow WildcardQueries,
+    a Wildcard term should not start with one of the wildcards * or ?.
+    (The wildcard field type however, is optimized for leading wildcards)
+
+  properties:
+  - name: field
+    type: string
+    description: |
+      Field you wish to search.
+
+  - name: value
+    type: string
+    description: |
+      Wildcard pattern for terms you wish to find.
+
+  - name: boost
+    type: double
+    optional: true
+    description: |
+      Floating point number used to decrease or increase the relevance scores of a query.
+
+  - name: case_insensitive
+    type: boolean
+    optional: true
+    description: |
+      Allows ASCII case insensitive matching of the value with the indexed field values when set to true.
+      Default is false which means the case sensitivity of matching depends on the underlying field’s mapping.
+
+  - name: rewrite
+    type: string
+    optional: true
+    domain_type_name: elasticsearch_rewrite_parameter
+

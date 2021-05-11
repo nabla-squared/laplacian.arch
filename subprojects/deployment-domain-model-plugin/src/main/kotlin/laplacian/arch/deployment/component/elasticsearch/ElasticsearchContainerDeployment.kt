@@ -13,6 +13,10 @@ interface ElasticsearchContainerDeployment : ContainerDeployment {
      */
     val port: Int
     /**
+     * The initial_data of this elasticsearch_container_deployment.
+     */
+    val initialData: List<InitialIndexData>
+    /**
      * Returns wether this instance is a elasticsearch_container_deployment or not.
      */
     val isaElasticsearchContainerDeployment: Boolean

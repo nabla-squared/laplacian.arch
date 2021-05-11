@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+set -e
+
+HOSTNAME='{{deployment.instance_name}}'
+PORT='{{deployment.port}}'
+BASE_URL="http://$HOSTNAME:$PORT"
+HEALTH_API_ENDPOINT="$BASE_URL/_cluster/health"
+DATA_FILE_DIR='/app/data'
+MAPPING_FILE_DIR='/app/mappings'
+CONNECT_TIMEOUT=30
+WAIT_TIME=10
+MAX_RETRIES=5
+
+main() {
+  set -x
+  wait_connection || die
+  {{#each deployment.initial_data as |index_data| ~}}
+  setup_index '{{index_data.index_name}}'|| die
+  {{/each}}
+}
+
+wait_connection() {
+  while ! echo exit | nc "$HOSTNAME" "$PORT"
+  do
+    sleep $CONNECT_TIMEOUT
+  done
+  curl \
+    -s \
+    --fail \
+    --connect-timeout "$CONNECT_TIMEOUT" \
+    --max-time "$WAIT_TIME" \
+    --retry "$MAX_RETRIES" \
+    --retry-delay 0 \
+    -X GET "$HEALTH_API_ENDPOINT?wait_for_status=yellow&pretty"
+}
+
+setup_index() {
+  local index_name=$1
+  echo "Setting up index: ${index_name}..."
+  recreate_index "$index_name" && \
+  index_data "$index_name"
+  echo "...Done."
+}
+
+recreate_index() {
+  local index_name=$1
+  local endpoint="$BASE_URL/$index_name?pretty"
+  if curl --fail -I "$endpoint"
+  then
+    curl --fail -X DELETE "$endpoint" || die
+  fi
+  curl \
+    --fail \
+    -X PUT "$BASE_URL/$index_name?pretty" \
+    -H 'Content-Type: application/json' \
+    -d "@$MAPPING_FILE_DIR/$index_name.json"
+}
+
+index_data() {
+  local index_name=$1
+  local endpoint="$BASE_URL/$index_name/_bulk?pretty"
+  curl \
+    --fail \
+    -X POST "$endpoint" \
+    -H "Content-Type: application/x-ndjson" \
+    --data-binary "@$DATA_FILE_DIR/$index_name.json"
+}
+
+die() {
+  exit 1
+}
+
+main
+

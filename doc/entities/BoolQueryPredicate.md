@@ -11,6 +11,9 @@ An entity describing a bool_query_predicate.
 
 ## Properties
 
+### minimum_should_match: `String`
+The minimum_should_match of this bool_query_predicate.
+
 ## Relationships
 
 ### must: `List<ElasticsearchQueryPredicate>`

@@ -102,7 +102,7 @@ data class Springboot2ApiServiceContainerImageRecord (
      */
     override val springVersion: String
         get() = getOrThrow("springVersion") {
-            "5.2.7.RELEASE"
+            "5.3.6.RELEASE"
         }
     /**
      * The reactor_version of this springboot2_api_service_container_image.
@@ -116,7 +116,7 @@ data class Springboot2ApiServiceContainerImageRecord (
      */
     override val springbootVersion: String
         get() = getOrThrow("springbootVersion") {
-            "2.3.1.RELEASE"
+            "2.4.5"
         }
     /**
      * The springboot_graphql_webflux_version of this springboot2_api_service_container_image.
@@ -130,7 +130,7 @@ data class Springboot2ApiServiceContainerImageRecord (
      */
     override val springDependencyManagerVersion: String
         get() = getOrThrow("springDependencyManagerVersion") {
-            "1.0.9.RELEASE"
+            "1.0.11.RELEASE"
         }
     /**
      * The graphql_java_version of this springboot2_api_service_container_image.
@@ -152,6 +152,20 @@ data class Springboot2ApiServiceContainerImageRecord (
     override val springbootMybatisVersion: String
         get() = getOrThrow("springbootMybatisVersion") {
             "2.1.4"
+        }
+    /**
+     * The elasticsearch_version of this springboot2_api_service_container_image.
+     */
+    override val elasticsearchVersion: String
+        get() = getOrThrow("elasticsearchVersion") {
+            "7.12.1"
+        }
+    /**
+     * The springdoc_openapi_version of this springboot2_api_service_container_image.
+     */
+    override val springdocOpenapiVersion: String
+        get() = getOrThrow("springdocOpenapiVersion") {
+            "1.5.7"
         }
     /**
      * The datasource_proxy_version of this springboot2_api_service_container_image.

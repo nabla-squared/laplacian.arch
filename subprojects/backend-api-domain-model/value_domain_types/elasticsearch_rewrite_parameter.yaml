@@ -1,0 +1,12 @@
+value_domain_types:
+- name: elasticsearch_rewrite_parameter
+  namespace: laplacian.arch.backend.api.elasticsearch
+  type: string
+  domain:
+    choices:
+    - value: constant_score
+    - value: constant_score_boolean
+    - value: scoring_boolean
+    - value: top_terms_blended_freqs_N
+    - value: top_terms_boost_N
+    - value: top_terms_N

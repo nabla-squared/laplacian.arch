@@ -9,6 +9,10 @@ import laplacian.util.*
  */
 interface BoolQueryPredicate : ElasticsearchQueryPredicate {
     /**
+     * The minimum_should_match of this bool_query_predicate.
+     */
+    val minimumShouldMatch: String?
+    /**
      * The must of this bool_query_predicate.
      */
     val must: List<ElasticsearchQueryPredicate>

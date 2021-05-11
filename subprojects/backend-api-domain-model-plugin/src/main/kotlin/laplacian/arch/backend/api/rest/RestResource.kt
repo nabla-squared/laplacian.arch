@@ -13,6 +13,14 @@ interface RestResource {
      */
     val name: String
     /**
+     * The namespace of this rest_resource.
+     */
+    val namespace: String
+    /**
+     * The path of this rest_resource.
+     */
+    val path: String
+    /**
      * The description of this rest_resource.
      */
     val description: String
@@ -20,14 +28,6 @@ interface RestResource {
      * The resource_model_name of this rest_resource.
      */
     val resourceModelName: String?
-    /**
-     * The base_url of this rest_resource.
-     */
-    val baseUrl: String
-    /**
-     * Defines this rest_resource is enable_automatic_cookie_handling or not.
-     */
-    val enableAutomaticCookieHandling: Boolean
     /**
      * The operations of this rest_resource.
      */

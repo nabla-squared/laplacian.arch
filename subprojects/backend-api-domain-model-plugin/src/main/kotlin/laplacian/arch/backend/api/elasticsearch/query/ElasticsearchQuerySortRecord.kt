@@ -19,7 +19,9 @@ open class ElasticsearchQuerySortRecord (
      * The type of this elasticsearch_query_sort.
      */
     override val type: String
-        get() = getOrThrow("type")
+        get() = getOrThrow("type") {
+            "field"
+        }
     /**
      * The order of this elasticsearch_query_sort.
      */

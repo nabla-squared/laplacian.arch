@@ -11,4 +11,8 @@ class AllRestResources(
     list: List<RestResource>,
     val context: Context
 ) : List<RestResource> by list {
+    val inNamespace: List<RestResource>
+        get() = filter {
+            it.namespace.startsWith(context.get("project.namespace") as String)
+        }
 }

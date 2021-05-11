@@ -1,0 +1,24 @@
+entities:
+- name: datasource_entry
+  namespace: laplacian.arch.backend.api
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+    domain_type_name: identifier
+
+  - name: primary
+    type: boolean
+    optional: true
+    default_value: |
+      false
+
+  relationships:
+  - name: datasource
+    reference_entity_name: datasource
+    reference_entity_namespace: laplacian.arch.backend.api.datasource
+    cardinality: '1'
+    mappings:
+    - from: name
+      to: name

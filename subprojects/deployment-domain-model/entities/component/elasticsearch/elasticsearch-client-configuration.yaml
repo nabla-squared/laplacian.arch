@@ -1,0 +1,21 @@
+entities:
+- name: elasticsearch_client_configuration
+  namespace: laplacian.arch.deployment.component.elasticsearch
+
+  properties:
+  - name: name
+    type: string
+    primary_key: true
+
+  - name: port
+    type: number
+    optional: true
+    default_value: |
+      9200
+
+  - name: endpoints
+    type: string
+    multiple: true
+    optional: true
+    default_value: |
+      listOf("http://${name}:${port}")

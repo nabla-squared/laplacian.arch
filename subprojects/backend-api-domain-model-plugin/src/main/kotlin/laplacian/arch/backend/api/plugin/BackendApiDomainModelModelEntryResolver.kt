@@ -2,6 +2,10 @@ package laplacian.arch.backend.api.plugin
 import org.pf4j.Extension
 import laplacian.generate.ModelEntryResolver
 import laplacian.generate.ExecutionContext
+import laplacian.arch.backend.api.aggregate.AllAggregateEntries
+import laplacian.arch.backend.api.aggregate.AggregateEntryRecord
+import laplacian.arch.backend.api.aggregate.AllAggregates
+import laplacian.arch.backend.api.aggregate.AggregateRecord
 import laplacian.arch.backend.api.AllApiCallArguments
 import laplacian.arch.backend.api.ApiCallArgumentRecord
 import laplacian.arch.backend.api.cache.AllCachePolicies
@@ -10,8 +14,6 @@ import laplacian.arch.backend.api.data_file.AllDataFiles
 import laplacian.arch.backend.api.data_file.DataFileRecord
 import laplacian.arch.backend.api.datasource.AllDatasources
 import laplacian.arch.backend.api.datasource.DatasourceRecord
-import laplacian.arch.backend.api.datasource.AllDatasourceEntries
-import laplacian.arch.backend.api.datasource.DatasourceEntryRecord
 import laplacian.arch.backend.api.AllDurations
 import laplacian.arch.backend.api.DurationRecord
 import laplacian.arch.backend.api.elasticsearch.aggregate.AllBucketScriptPaths
@@ -26,12 +28,16 @@ import laplacian.arch.backend.api.elasticsearch.aggregate.AllAggregateGroupRange
 import laplacian.arch.backend.api.elasticsearch.aggregate.AggregateGroupRangeRecord
 import laplacian.arch.backend.api.elasticsearch.aggregate.AllKeyedFilters
 import laplacian.arch.backend.api.elasticsearch.aggregate.KeyedFilterRecord
+import laplacian.arch.backend.api.elasticsearch.AllElasticsearchClients
+import laplacian.arch.backend.api.elasticsearch.ElasticsearchClientRecord
 import laplacian.arch.backend.api.elasticsearch.aggregate.AllElasticsearchAggregates
 import laplacian.arch.backend.api.elasticsearch.aggregate.ElasticsearchAggregateRecord
 import laplacian.arch.backend.api.elasticsearch.AllElasticsearchIndexes
 import laplacian.arch.backend.api.elasticsearch.ElasticsearchIndexRecord
 import laplacian.arch.backend.api.elasticsearch.AllElasticsearchIndexSorts
 import laplacian.arch.backend.api.elasticsearch.ElasticsearchIndexSortRecord
+import laplacian.arch.backend.api.elasticsearch.query.AllElasticsearchQueryCollapses
+import laplacian.arch.backend.api.elasticsearch.query.ElasticsearchQueryCollapseRecord
 import laplacian.arch.backend.api.elasticsearch.query.AllElasticsearchQueryPredicates
 import laplacian.arch.backend.api.elasticsearch.query.ElasticsearchQueryPredicateRecord
 import laplacian.arch.backend.api.elasticsearch.query.AllElasticsearchQuerySorts
@@ -44,16 +50,22 @@ import laplacian.arch.backend.api.rest.AllArgumentAssignments
 import laplacian.arch.backend.api.rest.ArgumentAssignmentRecord
 import laplacian.arch.backend.api.rest.AllArgumentAssignmentValues
 import laplacian.arch.backend.api.rest.ArgumentAssignmentValueRecord
-import laplacian.arch.backend.api.rest.AllRestOperationResponses
-import laplacian.arch.backend.api.rest.RestOperationResponseRecord
-import laplacian.arch.backend.api.rest.AllRestRequestParameters
-import laplacian.arch.backend.api.rest.RestRequestParameterRecord
+import laplacian.arch.backend.api.rest.AllRestOperationParameters
+import laplacian.arch.backend.api.rest.RestOperationParameterRecord
+import laplacian.arch.backend.api.rest.AllRestOperationBodyDefinitions
+import laplacian.arch.backend.api.rest.RestOperationBodyDefinitionRecord
+import laplacian.arch.backend.api.rest.AllRestOperationBodySchemas
+import laplacian.arch.backend.api.rest.RestOperationBodySchemaRecord
+import laplacian.arch.backend.api.rest.AllRestOperationDependencies
+import laplacian.arch.backend.api.rest.RestOperationDependencyRecord
+import laplacian.arch.backend.api.rest.AllRestResourceEntries
+import laplacian.arch.backend.api.rest.RestResourceEntryRecord
 import laplacian.arch.backend.api.rest.AllRestResources
 import laplacian.arch.backend.api.rest.RestResourceRecord
 import laplacian.arch.backend.api.AllServices
 import laplacian.arch.backend.api.ServiceRecord
-import laplacian.arch.backend.api.AllElasticSearchClients
-import laplacian.arch.backend.api.ElasticSearchClientRecord
+import laplacian.arch.backend.api.AllDatasourceEntries
+import laplacian.arch.backend.api.DatasourceEntryRecord
 import laplacian.arch.backend.api.AllServiceConfigurations
 import laplacian.arch.backend.api.ServiceConfigurationRecord
 import laplacian.arch.backend.api.AllConfigurationBindings
@@ -66,11 +78,12 @@ class BackendApiDomainModelModelEntryResolver: ModelEntryResolver {
 
     override fun resolves(key: String, model: Map<String, Any?>): Boolean {
         return arrayOf(
+            "aggregate_entries",
+            "aggregates",
             "api_call_arguments",
             "cache_policies",
             "data_files",
             "datasources",
-            "datasource_entries",
             "durations",
             "bucket_script_paths",
             "field_sorts",
@@ -78,20 +91,25 @@ class BackendApiDomainModelModelEntryResolver: ModelEntryResolver {
             "date_histogram_intervals",
             "aggregate_group_ranges",
             "keyed_filters",
+            "elasticsearch_clients",
             "elasticsearch_aggregates",
             "elasticsearch_indexes",
             "elasticsearch_index_sorts",
+            "elasticsearch_query_collapses",
             "elasticsearch_query_predicates",
             "elasticsearch_query_sorts",
             "elasticsearch_queries",
             "graphql_types",
             "argument_assignments",
             "argument_assignment_values",
-            "rest_operation_responses",
-            "rest_request_parameters",
+            "rest_operation_parameters",
+            "rest_operation_body_definitions",
+            "rest_operation_body_schemas",
+            "rest_operation_dependencies",
+            "rest_resource_entries",
             "rest_resources",
             "services",
-            "elastic_search_clients",
+            "datasource_entries",
             "service_configurations",
             "configuration_bindings"
         ).any { it == key }
@@ -99,6 +117,18 @@ class BackendApiDomainModelModelEntryResolver: ModelEntryResolver {
 
     override fun resolve(key: String, model: Map<String, Any?>, context: ExecutionContext): Any? {
         return when (key) {
+            "aggregate_entries" -> AllAggregateEntries(
+                model.getList<Record>("aggregate_entries", emptyList())
+                     .mergeWithKeys("name", "namespace")
+                     .let{ AggregateEntryRecord.from(it, context.currentModel) },
+                context.currentModel
+            )
+            "aggregates" -> AllAggregates(
+                model.getList<Record>("aggregates", emptyList())
+                     .mergeWithKeys("name", "namespace")
+                     .let{ AggregateRecord.from(it, context.currentModel) },
+                context.currentModel
+            )
             "api_call_arguments" -> AllApiCallArguments(
                 model.getList<Record>("api_call_arguments", emptyList())
                      .mergeWithKeys("name")
@@ -121,12 +151,6 @@ class BackendApiDomainModelModelEntryResolver: ModelEntryResolver {
                 model.getList<Record>("datasources", emptyList())
                      .mergeWithKeys("name")
                      .let{ DatasourceRecord.from(it, context.currentModel) },
-                context.currentModel
-            )
-            "datasource_entries" -> AllDatasourceEntries(
-                model.getList<Record>("datasource_entries", emptyList())
-                     .mergeWithKeys()
-                     .let{ DatasourceEntryRecord.from(it, context.currentModel) },
                 context.currentModel
             )
             "durations" -> AllDurations(
@@ -171,6 +195,12 @@ class BackendApiDomainModelModelEntryResolver: ModelEntryResolver {
                      .let{ KeyedFilterRecord.from(it, context.currentModel) },
                 context.currentModel
             )
+            "elasticsearch_clients" -> AllElasticsearchClients(
+                model.getList<Record>("elasticsearch_clients", emptyList())
+                     .mergeWithKeys("name")
+                     .let{ ElasticsearchClientRecord.from(it, context.currentModel) },
+                context.currentModel
+            )
             "elasticsearch_aggregates" -> AllElasticsearchAggregates(
                 model.getList<Record>("elasticsearch_aggregates", emptyList())
                      .mergeWithKeys("name")
@@ -187,6 +217,12 @@ class BackendApiDomainModelModelEntryResolver: ModelEntryResolver {
                 model.getList<Record>("elasticsearch_index_sorts", emptyList())
                      .mergeWithKeys("field")
                      .let{ ElasticsearchIndexSortRecord.from(it, context.currentModel) },
+                context.currentModel
+            )
+            "elasticsearch_query_collapses" -> AllElasticsearchQueryCollapses(
+                model.getList<Record>("elasticsearch_query_collapses", emptyList())
+                     .mergeWithKeys("field")
+                     .let{ ElasticsearchQueryCollapseRecord.from(it, context.currentModel) },
                 context.currentModel
             )
             "elasticsearch_query_predicates" -> AllElasticsearchQueryPredicates(
@@ -225,21 +261,39 @@ class BackendApiDomainModelModelEntryResolver: ModelEntryResolver {
                      .let{ ArgumentAssignmentValueRecord.from(it, context.currentModel) },
                 context.currentModel
             )
-            "rest_operation_responses" -> AllRestOperationResponses(
-                model.getList<Record>("rest_operation_responses", emptyList())
-                     .mergeWithKeys()
-                     .let{ RestOperationResponseRecord.from(it, context.currentModel) },
+            "rest_operation_parameters" -> AllRestOperationParameters(
+                model.getList<Record>("rest_operation_parameters", emptyList())
+                     .mergeWithKeys("name")
+                     .let{ RestOperationParameterRecord.from(it, context.currentModel) },
                 context.currentModel
             )
-            "rest_request_parameters" -> AllRestRequestParameters(
-                model.getList<Record>("rest_request_parameters", emptyList())
-                     .mergeWithKeys("name")
-                     .let{ RestRequestParameterRecord.from(it, context.currentModel) },
+            "rest_operation_body_definitions" -> AllRestOperationBodyDefinitions(
+                model.getList<Record>("rest_operation_body_definitions", emptyList())
+                     .mergeWithKeys()
+                     .let{ RestOperationBodyDefinitionRecord.from(it, context.currentModel) },
+                context.currentModel
+            )
+            "rest_operation_body_schemas" -> AllRestOperationBodySchemas(
+                model.getList<Record>("rest_operation_body_schemas", emptyList())
+                     .mergeWithKeys("name", "namespace")
+                     .let{ RestOperationBodySchemaRecord.from(it, context.currentModel) },
+                context.currentModel
+            )
+            "rest_operation_dependencies" -> AllRestOperationDependencies(
+                model.getList<Record>("rest_operation_dependencies", emptyList())
+                     .mergeWithKeys()
+                     .let{ RestOperationDependencyRecord.from(it, context.currentModel) },
+                context.currentModel
+            )
+            "rest_resource_entries" -> AllRestResourceEntries(
+                model.getList<Record>("rest_resource_entries", emptyList())
+                     .mergeWithKeys("name", "namespace")
+                     .let{ RestResourceEntryRecord.from(it, context.currentModel) },
                 context.currentModel
             )
             "rest_resources" -> AllRestResources(
                 model.getList<Record>("rest_resources", emptyList())
-                     .mergeWithKeys("name")
+                     .mergeWithKeys("name", "namespace")
                      .let{ RestResourceRecord.from(it, context.currentModel) },
                 context.currentModel
             )
@@ -249,10 +303,10 @@ class BackendApiDomainModelModelEntryResolver: ModelEntryResolver {
                      .let{ ServiceRecord.from(it, context.currentModel) },
                 context.currentModel
             )
-            "elastic_search_clients" -> AllElasticSearchClients(
-                model.getList<Record>("elastic_search_clients", emptyList())
-                     .mergeWithKeys()
-                     .let{ ElasticSearchClientRecord.from(it, context.currentModel) },
+            "datasource_entries" -> AllDatasourceEntries(
+                model.getList<Record>("datasource_entries", emptyList())
+                     .mergeWithKeys("name")
+                     .let{ DatasourceEntryRecord.from(it, context.currentModel) },
                 context.currentModel
             )
             "service_configurations" -> AllServiceConfigurations(
