@@ -6,9 +6,8 @@ DEPLOYMENT_BASE_DIR=$PROJECT_BASE_DIR/environments/{{hyphen environment.name}}
 COMPONENT_BASE_DIR=$PROJECT_BASE_DIR/components
 {{define 'deployment_components' (unique (map environment.deployments '@it.component')) ~}}
 {{define 'db_migrations'
-  (unique (filter environment.deployments '(and @it.isa_db_container_deployment @it.initial_data)'))
+  (unique (filter environment.deployments '(and @it.isa_db_container_deployment @it.enable_db_migration)'))
 ~}}
-
 main () {
   build_components
   build_migration_tasks

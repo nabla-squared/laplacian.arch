@@ -186,6 +186,8 @@ An entity describing a rest_operation_body_definition.
 An entity describing a rest_operation_body_schema.
 - [**RestOperationDependency**](<./doc/entities/RestOperationDependency.md>)
 An entity describing a rest_operation_dependency.
+- [**RestOperationResponseMapping**](<./doc/entities/RestOperationResponseMapping.md>)
+An entity describing a rest_operation_response_mapping.
 - [**RestResourceEntry**](<./doc/entities/RestResourceEntry.md>)
 An entity describing a rest_resource_entry.
 - [**RestResource**](<./doc/entities/RestResource.md>)

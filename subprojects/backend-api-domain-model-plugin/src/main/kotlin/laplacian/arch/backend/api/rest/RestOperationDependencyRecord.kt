@@ -4,6 +4,8 @@ import laplacian.arch.backend.api.aggregate.Aggregate
 import laplacian.arch.backend.api.aggregate.AggregateRecord
 import laplacian.arch.backend.api.aggregate.AggregateAccessMethod
 import laplacian.arch.backend.api.aggregate.AggregateAccessMethodRecord
+import laplacian.arch.backend.api.rest.RestOperationResponseMapping
+
 
 
 
@@ -58,6 +60,12 @@ data class RestOperationDependencyRecord (
      */
     override val accessMethod: AggregateAccessMethod by lazy {
         aggregate.accessMethods.find{ it.name == methodName }!!
+    }
+    /**
+     * The response_mapping of this rest_operation_dependency.
+     */
+    override val responseMapping: List<RestOperationResponseMapping> by lazy {
+        RestOperationResponseMappingRecord.from(_record.getList("response_mapping", emptyList()), _context)
     }
     /**
      * Returns wether this instance is a rest_operation_dependency or not.

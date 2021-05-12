@@ -165,3 +165,22 @@ entities:
     cardinality: '1'
     snippet: |
       aggregate.accessMethods.find{ it.name == methodName }!!
+
+  - name: response_mapping
+    reference_entity_name: rest_operation_response_mapping
+    cardinality: '*'
+    aggregate: true
+
+- name: rest_operation_response_mapping
+  namespace: laplacian.arch.backend.api.rest
+
+  properties:
+  - name: from
+    type: string
+    domain_type_name: identifier
+    optional: true
+
+  - name: to
+    type: string
+    domain_type_name: identifier
+    optional: true

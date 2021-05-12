@@ -34,6 +34,10 @@ interface RestOperationDependency {
      */
     val accessMethod: AggregateAccessMethod
     /**
+     * The response_mapping of this rest_operation_dependency.
+     */
+    val responseMapping: List<RestOperationResponseMapping>
+    /**
      * Returns wether this instance is a rest_operation_dependency or not.
      */
     val isaRestOperationDependency: Boolean

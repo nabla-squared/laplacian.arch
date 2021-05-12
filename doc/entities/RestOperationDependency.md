@@ -36,3 +36,7 @@ The access_method of this rest_operation_dependency.
   ```kotlin
   aggregate.accessMethods.find{ it.name == methodName }!!
   ```
+
+### response_mapping: `List<RestOperationResponseMapping>`
+The response_mapping of this rest_operation_dependency.
+- **Cardinality:** `*`

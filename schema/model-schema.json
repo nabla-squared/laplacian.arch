@@ -248,6 +248,14 @@
       }
     }
     ,
+    "rest_operation_response_mappings": {
+      "description": "An entity describing a rest_operation_response_mapping.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/entities/laplacian.arch.backend.api.rest.RestOperationResponseMapping"
+      }
+    }
+    ,
     "rest_resource_entries": {
       "description": "An entity describing a rest_resource_entry.",
       "type": "array",
@@ -968,6 +976,10 @@
             ],
             "type": "string"
           },
+          "description": {
+            "description": "The description of this aggregate_access_method.",
+            "type": "string"
+          },
           "multiple": {
             "description": "Defines this aggregate_access_method is multiple or not.",
             "type": "boolean"
@@ -1084,6 +1096,10 @@
             ],
             "type": "string"
           },
+          "description": {
+            "description": "The description of this aggregate_access_method.",
+            "type": "string"
+          },
           "multiple": {
             "description": "Defines this aggregate_access_method is multiple or not.",
             "type": "boolean"
@@ -1176,6 +1192,10 @@
               "elasticsearch",
               "mybatis"
             ],
+            "type": "string"
+          },
+          "description": {
+            "description": "The description of this aggregate_access_method.",
             "type": "string"
           },
           "multiple": {
@@ -4549,6 +4569,39 @@
           "method_name": {
             "description": "The method_name of this rest_operation_dependency.",
             "type": "string"
+          },
+          "response_mapping": {
+            "description": "The response_mapping of this rest_operation_dependency.",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/entities/laplacian.arch.backend.api.rest.RestOperationResponseMapping"
+            }
+          }
+        }
+      },
+      "laplacian.arch.backend.api.rest.RestOperationResponseMapping": {
+        "description": "An entity describing a rest_operation_response_mapping.",
+        "type": "object",
+        "required": [
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "_class_": { "const": "rest_operation_response_mapping" },
+          "from": {
+            "allOf": [{
+            "description": "The from of this rest_operation_response_mapping.",
+            "type": "string"
+            }, {
+            "$ref": "#/definitions/value_domain_types/identifier"
+            }]
+          },
+          "to": {
+            "allOf": [{
+            "description": "The to of this rest_operation_response_mapping.",
+            "type": "string"
+            }, {
+            "$ref": "#/definitions/value_domain_types/identifier"
+            }]
           }
         }
       },
@@ -6773,6 +6826,9 @@
         }, {
         "if": { "properties": { "_class_": { "const": "rest_operation_dependency" } }},
           "then": { "$ref": "#/definitions/entities/laplacian.arch.backend.api.rest.RestOperationDependency" }
+        }, {
+        "if": { "properties": { "_class_": { "const": "rest_operation_response_mapping" } }},
+          "then": { "$ref": "#/definitions/entities/laplacian.arch.backend.api.rest.RestOperationResponseMapping" }
         }, {
         "if": { "properties": { "_class_": { "const": "rest_resource_entry" } }},
           "then": { "$ref": "#/definitions/entities/laplacian.arch.backend.api.rest.RestResourceEntry" }

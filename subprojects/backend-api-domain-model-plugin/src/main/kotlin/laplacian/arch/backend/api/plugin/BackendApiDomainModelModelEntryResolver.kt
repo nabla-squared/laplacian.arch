@@ -58,6 +58,8 @@ import laplacian.arch.backend.api.rest.AllRestOperationBodySchemas
 import laplacian.arch.backend.api.rest.RestOperationBodySchemaRecord
 import laplacian.arch.backend.api.rest.AllRestOperationDependencies
 import laplacian.arch.backend.api.rest.RestOperationDependencyRecord
+import laplacian.arch.backend.api.rest.AllRestOperationResponseMappings
+import laplacian.arch.backend.api.rest.RestOperationResponseMappingRecord
 import laplacian.arch.backend.api.rest.AllRestResourceEntries
 import laplacian.arch.backend.api.rest.RestResourceEntryRecord
 import laplacian.arch.backend.api.rest.AllRestResources
@@ -106,6 +108,7 @@ class BackendApiDomainModelModelEntryResolver: ModelEntryResolver {
             "rest_operation_body_definitions",
             "rest_operation_body_schemas",
             "rest_operation_dependencies",
+            "rest_operation_response_mappings",
             "rest_resource_entries",
             "rest_resources",
             "services",
@@ -283,6 +286,12 @@ class BackendApiDomainModelModelEntryResolver: ModelEntryResolver {
                 model.getList<Record>("rest_operation_dependencies", emptyList())
                      .mergeWithKeys()
                      .let{ RestOperationDependencyRecord.from(it, context.currentModel) },
+                context.currentModel
+            )
+            "rest_operation_response_mappings" -> AllRestOperationResponseMappings(
+                model.getList<Record>("rest_operation_response_mappings", emptyList())
+                     .mergeWithKeys()
+                     .let{ RestOperationResponseMappingRecord.from(it, context.currentModel) },
                 context.currentModel
             )
             "rest_resource_entries" -> AllRestResourceEntries(

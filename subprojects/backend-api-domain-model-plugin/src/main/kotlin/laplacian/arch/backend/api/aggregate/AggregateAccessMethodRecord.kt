@@ -33,6 +33,13 @@ open class AggregateAccessMethodRecord (
     override val type: String
         get() = getOrThrow("type")
     /**
+     * The description of this aggregate_access_method.
+     */
+    override val description: String
+        get() = getOrThrow("description") {
+            "${name}"
+        }
+    /**
      * Defines this aggregate_access_method is multiple or not.
      */
     override val multiple: Boolean
@@ -49,17 +56,23 @@ open class AggregateAccessMethodRecord (
     /**
      * The record_model_name of this aggregate_access_method.
      */
-    override val recordModelName: String
-        get() = getOrThrow("recordModelName") {
-            aggregate.rootEntity.name
-        }
+    override val recordModelName: String?
+        by _record
     /**
      * The record_model_namespace of this aggregate_access_method.
      */
-    override val recordModelNamespace: String
-        get() = getOrThrow("recordModelNamespace") {
-            aggregate.rootEntity.namespace
-        }
+    override val recordModelNamespace: String?
+        by _record
+    /**
+     * The record_class_name of this aggregate_access_method.
+     */
+    override val recordClassName: String
+        get() = (recordModelName ?: aggregate.name).upperCamelize()
+    /**
+     * The result_class_name_in_java of this aggregate_access_method.
+     */
+    override val resultClassNameInJava: String
+        get() = if (multiple) "List<${recordClassName}>" else recordClassName
     /**
      * The arguments of this aggregate_access_method.
      */
@@ -69,18 +82,11 @@ open class AggregateAccessMethodRecord (
     /**
      * The record_model of this aggregate_access_method.
      */
-    override val recordModel: Entity by lazy {
+    override val recordModel: Entity? by lazy {
         EntityRecord.from(_context).find {
             it.name == recordModelName &&
             it.namespace == recordModelNamespace
-        } ?: throw IllegalStateException(
-            "There is no entity which meets the following condition(s): "
-            + "AggregateAccessMethod.record_model_name == entity.name (=$recordModelName) "
-            + "AggregateAccessMethod.record_model_namespace == entity.namespace (=$recordModelNamespace) "
-            + "Possible values are: " + EntityRecord.from(_context).map {
-              "(${ it.name },${ it.namespace })"
-            }.joinToString()
-        )
+        }
     }
     /**
      * Returns wether this instance is a aggregate_access_method or not.

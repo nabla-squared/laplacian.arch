@@ -18,6 +18,10 @@ interface AggregateAccessMethod {
      */
     val type: String
     /**
+     * The description of this aggregate_access_method.
+     */
+    val description: String
+    /**
      * Defines this aggregate_access_method is multiple or not.
      */
     val multiple: Boolean
@@ -28,11 +32,19 @@ interface AggregateAccessMethod {
     /**
      * The record_model_name of this aggregate_access_method.
      */
-    val recordModelName: String
+    val recordModelName: String?
     /**
      * The record_model_namespace of this aggregate_access_method.
      */
-    val recordModelNamespace: String
+    val recordModelNamespace: String?
+    /**
+     * The record_class_name of this aggregate_access_method.
+     */
+    val recordClassName: String
+    /**
+     * The result_class_name_in_java of this aggregate_access_method.
+     */
+    val resultClassNameInJava: String
     /**
      * The aggregate of this aggregate_access_method.
      */
@@ -44,7 +56,7 @@ interface AggregateAccessMethod {
     /**
      * The record_model of this aggregate_access_method.
      */
-    val recordModel: Entity
+    val recordModel: Entity?
     /**
      * Returns wether this instance is a aggregate_access_method or not.
      */

@@ -11,6 +11,12 @@ entities:
     type: string
     subtype_key: true
 
+  - name: description
+    type: string
+    optional: true
+    default_value: |
+      "${name}"
+
   - name: multiple
     type: boolean
     optional: true
@@ -26,14 +32,20 @@ entities:
   - name: record_model_name
     type: string
     optional: true
-    default_value: |
-      aggregate.rootEntity.name
 
   - name: record_model_namespace
     type: string
     optional: true
-    default_value: |
-      aggregate.rootEntity.namespace
+
+  - name: record_class_name
+    type: string
+    snippet: |
+      (recordModelName ?: aggregate.name).upperCamelize()
+
+  - name: result_class_name_in_java
+    type: string
+    snippet: |
+      if (multiple) "List<${recordClassName}>" else recordClassName
 
   relationships:
   - name: aggregate
@@ -51,7 +63,7 @@ entities:
   - name: record_model
     reference_entity_name: entity
     reference_entity_namespace: laplacian.metamodel
-    cardinality: '1'
+    cardinality: '0..1'
     mappings:
     - from: record_model_name
       to: name
