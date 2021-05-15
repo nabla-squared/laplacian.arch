@@ -1,22 +1,29 @@
 {{define 'table_model' table_data.table_model ~}}
+{{define 'schema_prefix' (printf (if table_data.schema_name '%s.' '') table_data.schema_name) ~}}
 {{define 'column_name_escape_format' (if deployment.isa_mysql_container_deployment '`%s`' '"%s"') ~}}
 {{#*inline "COLUMN_NAME_LIST"}}
   {{#if ENTITY.owner}}
   {{#each ENTITY.owner.primary_keys as |pk| ~}}
-  {{printf column_name_escape_format (concat (column-name ENTITY.owned_by.name) '_' (column-name pk.name))}},
+  {{printf column_name_escape_format (concat ENTITY.owned_by.table_column_name '_' column-name pk.table_column_name)}},
   {{/each}}
   {{~/if}}
   {{#each ENTITY.stored_properties as |prop| ~}}
-  {{printf column_name_escape_format (column-name prop.name)}}{{if (not @last)','}}
+  {{printf column_name_escape_format prop.table_column_name}}{{if (not @last)','}}
   {{/each}}
 {{/inline ~}}
 
 {{#*inline "COLUMN_VALUE"}}
-  {{define 'value' (trim (lookup RECORD PROP.name)) ~}}
+  {{define 'value' (lookup RECORD PROP.name) ~}}
+  {{define 'type_annotation' (find PROP.tags '(starts-with @it "database_field_type:")') ~}}
+  {{define 'type' (lower-snake (if type_annotation type_annotation PROP.type)) ~}}
   {{case
-    (eq value null) 'null'
-    (eq PROP.type 'string')  (printf "'%s'" value)
-    (eq PROP.type 'boolean') (if value '1' '0')
+    (eq value null) 'NULL'
+    (contains type 'bool') (if value 'TRUE' 'FALSE')
+    (contains type 'text') (printf "'%s'" value)
+    (contains type 'char') (printf "'%s'" value)
+    (contains type 'date') (printf "'%s'" value)
+    (contains type 'time') (printf "'%s'" value)
+    (eq type 'string') (printf "'%s'" value)
     value
   ~}}
 {{/inline ~}}
@@ -37,7 +44,7 @@
 {{/inline ~}}
 
 {{#*inline "INSERT_RECORDS"}}
-INSERT INTO {{TABLE_NAME ~}} (
+INSERT INTO {{schema_prefix}}{{TABLE_NAME ~}} (
   {{>COLUMN_NAME_LIST
     ENTITY=ENTITY}}
 ) VALUES (
@@ -63,7 +70,7 @@ INSERT INTO {{TABLE_NAME ~}} (
 {{/inline ~}}
 
 {{#*inline "DELETE_RECORDS"}}
-DELETE FROM {{TABLE_NAME ~}};
+DELETE FROM {{schema_prefix}}{{TABLE_NAME ~}};
 {{#each ENTITY.aggregates as |aggregate| ~}}
 {{>DELETE_RECORDS
   ENTITY=aggregate.reference_entity
@@ -77,5 +84,5 @@ DELETE FROM {{TABLE_NAME ~}};
 {{>INSERT_RECORDS
   ENTITY=table_model
   TABLE_NAME=table_data.table_model.table_name
-  RECORDS=table_data.dataset.content
+  RECORDS=records
   OWNER_RECORD=null}}

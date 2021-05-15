@@ -94,18 +94,7 @@ entities:
     type: string
     optional: true
 
-  - name: dataset_name
-    type: string
-
   relationships:
-  - name: dataset
-    reference_entity_name: dataset
-    reference_entity_namespace: laplacian.arch.deployment
-    cardinality: '1'
-    mappings:
-    - from: dataset_name
-      to: name
-
   - name: table_model
     reference_entity_name: entity
     reference_entity_namespace: laplacian.metamodel

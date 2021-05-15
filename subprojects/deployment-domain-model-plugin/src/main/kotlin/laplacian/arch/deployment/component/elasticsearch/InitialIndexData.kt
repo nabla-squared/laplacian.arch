@@ -1,5 +1,4 @@
 package laplacian.arch.deployment.component.elasticsearch
-import laplacian.arch.deployment.Dataset
 import laplacian.metamodel.Entity
 
 
@@ -17,14 +16,6 @@ interface InitialIndexData {
      * The index_model_name of this initial_index_data.
      */
     val indexModelName: String
-    /**
-     * The dataset_name of this initial_index_data.
-     */
-    val datasetName: String
-    /**
-     * The dataset of this initial_index_data.
-     */
-    val dataset: Dataset
     /**
      * The index_model of this initial_index_data.
      */

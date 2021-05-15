@@ -5119,7 +5119,6 @@
         "description": "An entity describing a initial_index_data.",
         "type": "object",
         "required": [
-          "dataset_name"
         ],
         "additionalProperties": false,
         "properties": {
@@ -5135,10 +5134,6 @@
             }, {
             "$ref": "#/definitions/value_domain_types/identifier"
             }]
-          },
-          "dataset_name": {
-            "description": "The dataset_name of this initial_index_data.",
-            "type": "string"
           }
         }
       },
@@ -6239,7 +6234,6 @@
         "description": "An entity describing a initial_table_data.",
         "type": "object",
         "required": [
-          "dataset_name"
         ],
         "additionalProperties": false,
         "properties": {
@@ -6258,10 +6252,6 @@
           },
           "schema_name": {
             "description": "The schema_name of this initial_table_data.",
-            "type": "string"
-          },
-          "dataset_name": {
-            "description": "The dataset_name of this initial_table_data.",
             "type": "string"
           }
         }

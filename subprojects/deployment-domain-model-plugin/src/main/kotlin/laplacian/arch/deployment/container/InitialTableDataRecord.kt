@@ -1,7 +1,5 @@
 package laplacian.arch.deployment.container
 import com.github.jknack.handlebars.Context
-import laplacian.arch.deployment.Dataset
-import laplacian.arch.deployment.DatasetRecord
 import laplacian.metamodel.Entity
 import laplacian.metamodel.EntityRecord
 
@@ -36,25 +34,6 @@ data class InitialTableDataRecord (
      */
     override val schemaName: String?
         by _record
-    /**
-     * The dataset_name of this initial_table_data.
-     */
-    override val datasetName: String
-        get() = getOrThrow("datasetName")
-    /**
-     * The dataset of this initial_table_data.
-     */
-    override val dataset: Dataset by lazy {
-        DatasetRecord.from(_context).find {
-            it.name == datasetName
-        } ?: throw IllegalStateException(
-            "There is no dataset which meets the following condition(s): "
-            + "InitialTableData.dataset_name == dataset.name (=$datasetName) "
-            + "Possible values are: " + DatasetRecord.from(_context).map {
-              "(${ it.name })"
-            }.joinToString()
-        )
-    }
     /**
      * The table_model of this initial_table_data.
      */

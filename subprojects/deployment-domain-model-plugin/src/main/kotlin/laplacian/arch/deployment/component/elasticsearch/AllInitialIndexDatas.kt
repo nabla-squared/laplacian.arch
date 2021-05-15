@@ -1,6 +1,5 @@
 package laplacian.arch.deployment.component.elasticsearch
 import com.github.jknack.handlebars.Context
-import laplacian.arch.deployment.Dataset
 import laplacian.metamodel.Entity
 
 import laplacian.util.*

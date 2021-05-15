@@ -1,5 +1,4 @@
 package laplacian.arch.deployment.container
-import laplacian.arch.deployment.Dataset
 import laplacian.metamodel.Entity
 
 
@@ -21,14 +20,6 @@ interface InitialTableData {
      * The schema_name of this initial_table_data.
      */
     val schemaName: String?
-    /**
-     * The dataset_name of this initial_table_data.
-     */
-    val datasetName: String
-    /**
-     * The dataset of this initial_table_data.
-     */
-    val dataset: Dataset
     /**
      * The table_model of this initial_table_data.
      */

@@ -42,18 +42,7 @@ entities:
     domain_type_name: identifier
     primary_key: true
 
-  - name: dataset_name
-    type: string
-
   relationships:
-  - name: dataset
-    reference_entity_name: dataset
-    reference_entity_namespace: laplacian.arch.deployment
-    cardinality: '1'
-    mappings:
-    - from: dataset_name
-      to: name
-
   - name: index_model
     reference_entity_name: entity
     reference_entity_namespace: laplacian.metamodel
