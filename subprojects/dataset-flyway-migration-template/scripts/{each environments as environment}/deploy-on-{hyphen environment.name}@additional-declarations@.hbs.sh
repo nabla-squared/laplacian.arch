@@ -4,7 +4,7 @@
 {{#each db_migrations as |deployment| ~}}
 build_{{lower-snake deployment.name}}_migration() {
   (cd $DEPLOYMENT_BASE_DIR/{{deployment.instance_name}}-migration
-    ./gradlew build
+    ./gradlew build -x test
   )
 }
 {{/each}}
