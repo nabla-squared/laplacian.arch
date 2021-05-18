@@ -56,6 +56,10 @@ interface RestOperation {
      */
     val dependencies: List<RestOperationDependency>
     /**
+     * The usage_examples of this rest_operation.
+     */
+    val usageExamples: List<RestApiUsageExample>
+    /**
      * Returns wether this instance is a rest_operation or not.
      */
     val isaRestOperation: Boolean

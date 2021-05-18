@@ -1,0 +1,64 @@
+entities:
+- name: rest_api_usage_example
+  namespace: laplacian.arch.backend.api.rest
+
+  properties:
+  - name: rest_resource_name
+    type: string
+    domain_type_name: identifier
+
+  - name: namespace
+    type: string
+    domain_type_name: namespace
+
+  - name: operation_name
+    type: string
+    domain_type_name: identifier
+
+  - name: tags
+    type: string
+    multiple: true
+    optional: true
+
+  - name: usage
+    type: string
+    optional: true
+    default_value: |
+      "${operation.method.lowerCamelize()} ${operation.path.spaceDelimited()} of a ${restResourceName.spaceDelimited()}".capitalizeFirst()
+
+  - name: curl
+    type: string
+
+  - name: queryParameters
+    type: string
+    snippet: |
+      """\?(.*)'""".toRegex().find(curl)?.groupValues?.get(1) ?: ""
+
+  - name: request_body_json
+    type: string
+    snippet: |
+      """-d\s+'([\s\S]*)'""".toRegex().find(curl)?.groupValues?.get(1) ?: ""
+
+  - name: status_code
+    type: number
+
+  - name: response_body_json
+    type: string
+
+  relationships:
+  - name: rest_resource
+    reference_entity_name: rest_resource
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '1'
+    mappings:
+    - from: rest_resource_name
+      to: name
+    - from: namespace
+      to: namespace
+
+  - name: operation
+    reference_entity_name: rest_operation
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '1'
+    snippet: |
+      restResource.operations.find{ it.name == operationName }!!

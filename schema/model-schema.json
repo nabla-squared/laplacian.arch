@@ -216,6 +216,14 @@
       }
     }
     ,
+    "rest_api_usage_examples": {
+      "description": "An entity describing a rest_api_usage_example.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/entities/laplacian.arch.backend.api.rest.RestApiUsageExample"
+      }
+    }
+    ,
     "rest_operation_parameters": {
       "description": "An entity describing a rest_operation_parameter.",
       "type": "array",
@@ -4355,6 +4363,69 @@
         }
         }
       },
+      "laplacian.arch.backend.api.rest.RestApiUsageExample": {
+        "description": "An entity describing a rest_api_usage_example.",
+        "type": "object",
+        "required": [
+          "rest_resource_name",
+          "namespace",
+          "operation_name",
+          "curl",
+          "status_code",
+          "response_body_json"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "_class_": { "const": "rest_api_usage_example" },
+          "rest_resource_name": {
+            "allOf": [{
+            "description": "The rest_resource_name of this rest_api_usage_example.",
+            "type": "string"
+            }, {
+            "$ref": "#/definitions/value_domain_types/identifier"
+            }]
+          },
+          "namespace": {
+            "allOf": [{
+            "description": "The namespace of this rest_api_usage_example.",
+            "type": "string"
+            }, {
+            "$ref": "#/definitions/value_domain_types/namespace"
+            }]
+          },
+          "operation_name": {
+            "allOf": [{
+            "description": "The operation_name of this rest_api_usage_example.",
+            "type": "string"
+            }, {
+            "$ref": "#/definitions/value_domain_types/identifier"
+            }]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+            "description": "The tags of this rest_api_usage_example.",
+            "type": "string"
+            }
+          },
+          "usage": {
+            "description": "The usage of this rest_api_usage_example.",
+            "type": "string"
+          },
+          "curl": {
+            "description": "The curl of this rest_api_usage_example.",
+            "type": "string"
+          },
+          "status_code": {
+            "description": "The status_code of this rest_api_usage_example.",
+            "type": "number"
+          },
+          "response_body_json": {
+            "description": "The response_body_json of this rest_api_usage_example.",
+            "type": "string"
+          }
+        }
+      },
       "laplacian.arch.backend.api.rest.RestOperationParameter": {
         "description": "An entity describing a rest_operation_parameter.",
         "type": "object",
@@ -4422,8 +4493,12 @@
             "type": "string"
           },
           "name": {
+            "allOf": [{
             "description": "The name of this rest_operation.",
             "type": "string"
+            }, {
+            "$ref": "#/definitions/value_domain_types/identifier"
+            }]
           },
           "description": {
             "description": "The description of this rest_operation.",
@@ -6804,6 +6879,9 @@
         }, {
         "if": { "properties": { "_class_": { "const": "argument_assignment_value" } }},
           "then": { "$ref": "#/definitions/entities/laplacian.arch.backend.api.rest.ArgumentAssignmentValue" }
+        }, {
+        "if": { "properties": { "_class_": { "const": "rest_api_usage_example" } }},
+          "then": { "$ref": "#/definitions/entities/laplacian.arch.backend.api.rest.RestApiUsageExample" }
         }, {
         "if": { "properties": { "_class_": { "const": "rest_operation_parameter" } }},
           "then": { "$ref": "#/definitions/entities/laplacian.arch.backend.api.rest.RestOperationParameter" }

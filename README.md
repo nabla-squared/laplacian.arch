@@ -1,6 +1,5 @@
 # Laplacian Core
 
-<!-- @model_overview@ -->
 ### Model overview
 
 The following diagram explains the entities included in this module.
@@ -176,6 +175,8 @@ An entity describing a argument_assignment_value_fetcher_argument.
 An entity describing a argument_assignment_value_graphql_type_config.
 - [**ArgumentAssignmentValueExpression**](<./doc/entities/ArgumentAssignmentValueExpression.md>)
 An entity describing a argument_assignment_value_expression.
+- [**RestApiUsageExample**](<./doc/entities/RestApiUsageExample.md>)
+An entity describing a rest_api_usage_example.
 - [**RestOperationParameter**](<./doc/entities/RestOperationParameter.md>)
 An entity describing a rest_operation_parameter.
 - [**RestOperation**](<./doc/entities/RestOperation.md>)
@@ -203,5 +204,4 @@ An entity describing a service_configuration.
 - [**ConfigurationBinding**](<./doc/entities/ConfigurationBinding.md>)
 An entity describing a configuration_binding.
 
-
-<!-- @model_overview@ -->
+ -->

@@ -37,6 +37,10 @@ interface RestResource {
      */
     val configurations: List<ConfigurationBinding>
     /**
+     * The usage_examples of this rest_resource.
+     */
+    val usageExamples: List<RestApiUsageExample>
+    /**
      * Returns wether this instance is a rest_resource or not.
      */
     val isaRestResource: Boolean

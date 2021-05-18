@@ -50,6 +50,8 @@ import laplacian.arch.backend.api.rest.AllArgumentAssignments
 import laplacian.arch.backend.api.rest.ArgumentAssignmentRecord
 import laplacian.arch.backend.api.rest.AllArgumentAssignmentValues
 import laplacian.arch.backend.api.rest.ArgumentAssignmentValueRecord
+import laplacian.arch.backend.api.rest.AllRestApiUsageExamples
+import laplacian.arch.backend.api.rest.RestApiUsageExampleRecord
 import laplacian.arch.backend.api.rest.AllRestOperationParameters
 import laplacian.arch.backend.api.rest.RestOperationParameterRecord
 import laplacian.arch.backend.api.rest.AllRestOperationBodyDefinitions
@@ -104,6 +106,7 @@ class BackendApiDomainModelModelEntryResolver: ModelEntryResolver {
             "graphql_types",
             "argument_assignments",
             "argument_assignment_values",
+            "rest_api_usage_examples",
             "rest_operation_parameters",
             "rest_operation_body_definitions",
             "rest_operation_body_schemas",
@@ -262,6 +265,12 @@ class BackendApiDomainModelModelEntryResolver: ModelEntryResolver {
                 model.getList<Record>("argument_assignment_values", emptyList())
                      .mergeWithKeys()
                      .let{ ArgumentAssignmentValueRecord.from(it, context.currentModel) },
+                context.currentModel
+            )
+            "rest_api_usage_examples" -> AllRestApiUsageExamples(
+                model.getList<Record>("rest_api_usage_examples", emptyList())
+                     .mergeWithKeys()
+                     .let{ RestApiUsageExampleRecord.from(it, context.currentModel) },
                 context.currentModel
             )
             "rest_operation_parameters" -> AllRestOperationParameters(

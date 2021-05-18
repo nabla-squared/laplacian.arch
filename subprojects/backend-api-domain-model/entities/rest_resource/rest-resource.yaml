@@ -44,3 +44,13 @@ entities:
     reference_entity_namespace: laplacian.arch.backend.api
     cardinality: '*'
     aggregate: true
+
+  - name: usage_examples
+    reference_entity_name: rest_api_usage_example
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '*'
+    mappings:
+    - from: name
+      to: rest_resource_name
+    - from: namespace
+      to: namespace

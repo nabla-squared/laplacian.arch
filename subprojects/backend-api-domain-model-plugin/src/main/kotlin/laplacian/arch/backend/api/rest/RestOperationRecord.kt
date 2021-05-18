@@ -8,6 +8,8 @@ import laplacian.arch.backend.api.rest.RestOperationBodyDefinition
 
 import laplacian.arch.backend.api.rest.RestOperationDependency
 
+import laplacian.arch.backend.api.rest.RestApiUsageExample
+
 
 
 
@@ -86,6 +88,12 @@ data class RestOperationRecord (
      */
     override val dependencies: List<RestOperationDependency> by lazy {
         RestOperationDependencyRecord.from(_record.getList("dependencies", emptyList()), _context)
+    }
+    /**
+     * The usage_examples of this rest_operation.
+     */
+    override val usageExamples: List<RestApiUsageExample> by lazy {
+        restResource.usageExamples.filter{ it.operationName == name }
     }
     /**
      * Returns wether this instance is a rest_operation or not.

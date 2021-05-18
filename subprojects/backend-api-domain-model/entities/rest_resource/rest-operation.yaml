@@ -14,6 +14,7 @@ entities:
   - name: name
     type: string
     primary_key: true
+    domain_type_name: identifier
 
   - name: description
     type: string
@@ -70,6 +71,13 @@ entities:
     cardinality: '*'
     aggregate: true
 
+  - name: usage_examples
+    reference_entity_name: rest_api_usage_example
+    reference_entity_namespace: laplacian.arch.backend.api.rest
+    cardinality: '*'
+    snippet: |
+      restResource.usageExamples.filter{ it.operationName == name }
+
 - name: rest_operation_body_definition
   namespace: laplacian.arch.backend.api.rest
 
@@ -124,7 +132,6 @@ entities:
       to: name
     - from: namespace
       to: namespace
-
 
 - name: rest_operation_dependency
   namespace: laplacian.arch.backend.api.rest

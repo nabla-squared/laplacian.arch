@@ -41,3 +41,7 @@ The operations of this rest_resource.
 ### configurations: `List<ConfigurationBinding>`
 The configurations of this rest_resource.
 - **Cardinality:** `*`
+
+### usage_examples: `List<RestApiUsageExample>`
+The usage_examples of this rest_resource.
+- **Cardinality:** `*`

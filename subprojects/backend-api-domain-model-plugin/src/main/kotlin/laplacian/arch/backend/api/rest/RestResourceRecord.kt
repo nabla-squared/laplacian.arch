@@ -4,6 +4,8 @@ import laplacian.arch.backend.api.rest.RestOperation
 
 import laplacian.arch.backend.api.ConfigurationBinding
 import laplacian.arch.backend.api.ConfigurationBindingRecord
+import laplacian.arch.backend.api.rest.RestApiUsageExample
+
 
 
 
@@ -55,6 +57,15 @@ data class RestResourceRecord (
      */
     override val configurations: List<ConfigurationBinding> by lazy {
         ConfigurationBindingRecord.from(_record.getList("configurations", emptyList()), _context)
+    }
+    /**
+     * The usage_examples of this rest_resource.
+     */
+    override val usageExamples: List<RestApiUsageExample> by lazy {
+        RestApiUsageExampleRecord.from(_context).filter {
+            it.restResourceName == name &&
+            it.namespace == namespace
+        }
     }
     /**
      * Returns wether this instance is a rest_resource or not.

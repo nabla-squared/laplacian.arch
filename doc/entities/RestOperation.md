@@ -64,3 +64,11 @@ The response_body of this rest_operation.
 ### dependencies: `List<RestOperationDependency>`
 The dependencies of this rest_operation.
 - **Cardinality:** `*`
+
+### usage_examples: `List<RestApiUsageExample>`
+The usage_examples of this rest_operation.
+- **Cardinality:** `*`
+- **Code:**
+  ```kotlin
+  restResource.usageExamples.filter{ it.operationName == name }
+  ```
