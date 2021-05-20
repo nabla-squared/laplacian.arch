@@ -1,7 +1,8 @@
 {{define 'index_model' index_data.index_model ~}}
-{{define 'fields' index_model.stored_properties ~}}
+{{define 'fields' (filter index_model.stored_properties '(not (eq @it.table_column_name "_id"))') ~}}
+{{define 'document_id_field' (find index_model.stored_properties '(eq @it.table_column_name "_id")') ~}}
 {{define 'records' (lookup this (plural index_model.name)) ~}}
 {{#each records as |record| ~}}
-{"index":{}}
-{{printf '{'}}{{#each fields as |field|}}{{dquote (lower-snake field.table_column_name)}}:{{dquote (lookup record field.name)}}{{if (not @last) ','}}{{/each}}{{printf '}'}}
+{"index":{ {{~#if document_id_field}}"_id" : {{dquote (lookup record document_id_field.name)}}{{/if~}} }}
+{{printf '{'}}{{#each fields as |field|}}{{dquote (lower-snake field.table_column_name)}}:{{json (lookup record field.name)}}{{if (not @last) ','}}{{/each}}{{printf '}'}}
 {{/each}}

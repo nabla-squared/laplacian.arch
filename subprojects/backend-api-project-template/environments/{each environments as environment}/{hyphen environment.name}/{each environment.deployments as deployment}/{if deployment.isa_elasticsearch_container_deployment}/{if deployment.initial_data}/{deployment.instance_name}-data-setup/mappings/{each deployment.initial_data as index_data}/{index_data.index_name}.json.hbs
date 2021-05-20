@@ -1,5 +1,5 @@
 {{define 'index_model' index_data.index_model ~}}
-{{define 'fields' index_model.stored_properties ~}}
+{{define 'fields' (filter index_model.stored_properties '(not (eq @it.table_column_name "_id"))') ~}}
 {
   "mappings": {
     "properties": {
@@ -7,6 +7,7 @@
       {{define 'field_type_annotation' (find field.tags '(starts-with @it "elasticsearch_field_type:")') ~}}
       {{define 'field_type' (case
         field_type_annotation (starts-with field_type_annotation "elasticsearch_field_type:")
+        (eq file.type 'boolean') 'boolean'
         (eq field.type 'number') 'long'
         (eq field.type 'float') 'double'
         'text'
