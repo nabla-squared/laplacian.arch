@@ -3,7 +3,8 @@
   #
   {{deployment.instance_name}}:
     image: {{deployment.container_image_name}}
-    container_name: {{deployment.instance_name}}
+    container_name: {{hyphen environment.name}}-{{deployment.instance_name}}
+    hostname: {{deployment.instance_name}}
     ports:
     - '{{printf "%1$s:%1$s" deployment.port}}'
     expose:

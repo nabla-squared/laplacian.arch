@@ -5128,6 +5128,10 @@
             "description": "The name of this deployment.",
             "type": "string"
           },
+          "component_name": {
+            "description": "The component_name of this deployment.",
+            "type": "string"
+          },
           "type": {
             "description": "The type of this deployment.",
             "enum":[
@@ -5344,6 +5348,10 @@
             "description": "The name of this deployment.",
             "type": "string"
           },
+          "component_name": {
+            "description": "The component_name of this deployment.",
+            "type": "string"
+          },
           "type": {
             "description": "The type of this deployment.",
             "enum":[
@@ -5530,6 +5538,10 @@
           "_class_": { "const": "postgres_container_deployment" },
           "name": {
             "description": "The name of this deployment.",
+            "type": "string"
+          },
+          "component_name": {
+            "description": "The component_name of this deployment.",
             "type": "string"
           },
           "type": {
@@ -5907,6 +5919,10 @@
             "description": "The name of this deployment.",
             "type": "string"
           },
+          "component_name": {
+            "description": "The component_name of this deployment.",
+            "type": "string"
+          },
           "type": {
             "description": "The type of this deployment.",
             "enum":[
@@ -6032,6 +6048,10 @@
             "description": "The name of this deployment.",
             "type": "string"
           },
+          "component_name": {
+            "description": "The component_name of this deployment.",
+            "type": "string"
+          },
           "type": {
             "description": "The type of this deployment.",
             "enum":[
@@ -6070,6 +6090,10 @@
           "_class_": { "const": "container_deployment" },
           "name": {
             "description": "The name of this deployment.",
+            "type": "string"
+          },
+          "component_name": {
+            "description": "The component_name of this deployment.",
             "type": "string"
           },
           "type": {
@@ -6193,6 +6217,10 @@
           "_class_": { "const": "db_container_deployment" },
           "name": {
             "description": "The name of this deployment.",
+            "type": "string"
+          },
+          "component_name": {
+            "description": "The component_name of this deployment.",
             "type": "string"
           },
           "type": {
@@ -6346,6 +6374,10 @@
             "description": "The name of this deployment.",
             "type": "string"
           },
+          "component_name": {
+            "description": "The component_name of this deployment.",
+            "type": "string"
+          },
           "type": {
             "description": "The type of this deployment.",
             "enum":[
@@ -6384,6 +6416,10 @@
           "_class_": { "const": "container_on_gcp_cloudrun" },
           "name": {
             "description": "The name of this deployment.",
+            "type": "string"
+          },
+          "component_name": {
+            "description": "The component_name of this deployment.",
             "type": "string"
           },
           "type": {
@@ -6954,6 +6990,9 @@
         }, {
         "if": { "properties": { "_class_": { "const": "environment" } }},
           "then": { "$ref": "#/definitions/entities/laplacian.arch.deployment.Environment" }
+        }, {
+          "if": { "properties": { "_class_": {"type": "string"} }},
+          "else": { "additional_properties": true }
         }]
       }
     }

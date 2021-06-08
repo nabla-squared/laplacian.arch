@@ -13,6 +13,10 @@ interface Deployment {
      */
     val name: String
     /**
+     * The component_name of this deployment.
+     */
+    val componentName: String
+    /**
      * The type of this deployment.
      */
     val type: String

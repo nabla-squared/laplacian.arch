@@ -7,6 +7,12 @@ entities:
     type: string
     primary_key: true
 
+  - name: component_name
+    type: string
+    optional: true
+    default_value: |
+      name
+
   - name: type
     type: string
     subtype_key: true
@@ -22,5 +28,5 @@ entities:
     reference_entity_name: component
     reference_entity_namespace: laplacian.arch.deployment.component
     mappings:
-    - from: name
+    - from: component_name
       to: name

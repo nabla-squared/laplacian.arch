@@ -32,6 +32,13 @@ open class DeploymentRecord (
     override val name: String
         get() = getOrThrow("name")
     /**
+     * The component_name of this deployment.
+     */
+    override val componentName: String
+        get() = getOrThrow("componentName") {
+            name
+        }
+    /**
      * The type of this deployment.
      */
     override val type: String
@@ -41,10 +48,10 @@ open class DeploymentRecord (
      */
     override val component: Component by lazy {
         ComponentRecord.from(_context).find {
-            it.name == name
+            it.name == componentName
         } ?: throw IllegalStateException(
             "There is no component which meets the following condition(s): "
-            + "Deployment.name == component.name (=$name) "
+            + "Deployment.component_name == component.name (=$componentName) "
             + "Possible values are: " + ComponentRecord.from(_context).map {
               "(${ it.name })"
             }.joinToString()

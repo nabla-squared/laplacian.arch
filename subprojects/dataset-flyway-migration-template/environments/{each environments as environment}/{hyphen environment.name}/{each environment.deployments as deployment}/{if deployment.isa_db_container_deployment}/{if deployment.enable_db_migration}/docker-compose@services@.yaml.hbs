@@ -2,11 +2,11 @@
   #
   # {{deployment.name}} migration task
   #
-  {{instance_name}}-migration:
+  {{instance_name}}:
     build:
       context: ./{{instance_name}}
       dockerfile: Dockerfile
-    container_name: {{instance_name}}
+    container_name: {{hyphen environment.name}}-{{instance_name}}
     environment:
     {{define 'prefix' (concat 'datasource.' (hyphen datasource.name) '.') ~}}
     {{printf "- '%s=%s'" (upper-snake (concat prefix 'username')) deployment.username}}

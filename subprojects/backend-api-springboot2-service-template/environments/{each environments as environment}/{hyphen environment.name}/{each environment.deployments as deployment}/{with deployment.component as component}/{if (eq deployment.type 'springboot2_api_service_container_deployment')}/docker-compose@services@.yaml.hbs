@@ -6,7 +6,8 @@
     build:
       context: ../../components/{{hyphen component.name}}
       dockerfile: Dockerfile.local-build
-    container_name: {{deployment.instance_name}}
+    container_name: {{hyphen environment.name}}-{{deployment.instance_name}}
+    hostname: {{deployment.instance_name}}
     ports:
     - '{{printf '%1$s:%1$s' deployment.http_port}}'
     {{#if deployment.enable_debug ~}}
