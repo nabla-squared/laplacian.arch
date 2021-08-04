@@ -64,7 +64,7 @@ entities:
     type: string
     optional: true
     default_value: |
-      "19.8.0.0"
+      "21.1.0.0"
 
   - name: postgres_jdbc_driver_version
     type: string

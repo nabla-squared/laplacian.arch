@@ -43,7 +43,7 @@ dependencies {
   implementation "net.ttddyy:datasource-proxy:$datasourceProxyVersion"
   {{~/if}}
   {{#if service.depends_on_blocking_oracle_datasource ~}}
-  runtimeOnly "com.oracle.database.jdbc:ojdbc10:$oracleJdbcDriverVersion"
+  runtimeOnly "com.oracle.database.jdbc:ojdbc11:$oracleJdbcDriverVersion"
   {{~/if}}
   {{#if service.depends_on_non_blocking_postgres_datasource ~}}
   runtimeOnly "io.r2dbc:r2dbc-postgresql:$postgresR2dbcDriverVersion"

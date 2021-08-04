@@ -81,7 +81,7 @@ data class Springboot2ApiServiceContainerImageRecord (
      */
     override val oracleJdbcDriverVersion: String
         get() = getOrThrow("oracleJdbcDriverVersion") {
-            "19.8.0.0"
+            "21.1.0.0"
         }
     /**
      * The postgres_jdbc_driver_version of this springboot2_api_service_container_image.
